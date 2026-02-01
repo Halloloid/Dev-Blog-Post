@@ -1,11 +1,12 @@
 import express,{Request,Response} from "express"
 import { config } from "dotenv";
 import { connectDB,disconnectDB } from "./config/db";
+import cors from "cors"
+import cookieParser from "cookie-parser"
 import userRoutes from "./module/users/users.routes";
 import postRoutes from "./module/post/post.routes";
-import cookieParser from "cookie-parser"
-import cors from "cors"
 import authRoutes from "./module/authentication/auth.routes";
+import replyRoutes from "./module/replies/replies.routes";
 import commentRoutes from "./module/comments/comments.routes";
 
 config();
@@ -23,6 +24,7 @@ app.use(express.urlencoded({extended:true}))
 app.use("/auth",authRoutes)
 app.use("/api/users",userRoutes)
 app.use("/api/posts",postRoutes)
+app.use("/api/replies",replyRoutes)
 app.use("/api/comments",commentRoutes)
 app.use((req:Request,res:Response)=>{
     res.status(404).json({"Message":"No Such Routes"})
