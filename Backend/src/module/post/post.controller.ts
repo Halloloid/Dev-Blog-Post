@@ -221,7 +221,7 @@ export const specificPost = async(req:Request,res:Response) => {
 export const createPost = async(req:Request,res:Response) => {
     try {
         const user = req.user as {sub : string}
-        if(!user?.sub) return res.status(401).json({message:"Unauthorized in the post controller"});
+        if(!user?.sub) return res.status(401).json({message:"Unauthorized"});
 
         const {title,content,repo_link,exceprt,status} = req.body;
         // console.log("file:", req.file);
@@ -261,14 +261,6 @@ export const createPost = async(req:Request,res:Response) => {
             }
         })
 
-
-        //redis cache invalidation
-        try {
-            await redis.del("posts:p1")
-            console.log("Redis Cache Deleted for Page1")
-        } catch (error:any) {
-            console.error("Redis Cache Delete Error",error)
-        }
         res.status(201).json({message:"Post Created Successfully",post});
 
     } catch (error:any) {
@@ -348,17 +340,6 @@ export const deletePost = async(req:Request,res:Response) => {
             .status(403)
             .json({message:"Post not found or Not Allowed"})
         }
-        // const post = await prisma.post.findUnique({
-        //     where:{id}
-        // })
-
-        // if(!post) return res.status(404).json({message:"Post Not Found"});
-
-        // if(post.created_by !== userId) return res.status(403).json({message:"You cannot Delete Others Posts"});
-        // await prisma.post.delete({
-        //     where:{id}
-        // })
-        //redis cache invalidation
         try {
             await redis.del("posts:p1")
             console.log("Redis Cache Deleted for Page1")
@@ -368,6 +349,42 @@ export const deletePost = async(req:Request,res:Response) => {
         res.status(204).send()
     } catch (error:any) {
         console.error(error)
+        res.status(500).json({message:"Internal Server Error"})
+    }
+}
+
+export const publishPost = async(req:Request,res:Response) => {
+    try {
+        const {id} = req.params;
+        if(typeof id !== "string") return res.status(400).json({message:"Invalid Post ID"});
+
+        const userId = req.user?.sub;
+
+        const updated = await prisma.post.updateMany({
+            where:{
+                id,
+                created_by:userId,
+                status:{in : ["draft","archived"]}
+            },
+            data:{
+                status:"published"
+            }
+        })
+
+        if(updated.count === 0){
+            return res.status(403).json({message:"Post not found Unauthorized"})
+        }
+
+        try {
+            await redis.del("posts:p1")
+            console.log("Redis Cache Deleted for Page1")
+        } catch (error:any) {
+            console.error("Redis Cache Delete Error",error)
+        }
+
+        return res.status(200).json({message:"Post Published Successfully"})
+    } catch (error:any) {
+        console.error(error);
         res.status(500).json({message:"Internal Server Error"})
     }
 }
