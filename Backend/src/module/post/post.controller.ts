@@ -316,6 +316,13 @@ export const updatePost = async(req:Request,res:Response) => {
             data:dataToUpdate
         })
 
+        //redis cache invalidation
+        try {
+            await redis.del("posts:p1")
+            console.log("Redis Cache Deleted for Page1")
+        } catch (error:any) {
+            console.error("Redis Cache Delete Error",error)
+        }
         res.status(200).json(updatePost)
     } catch (error:any) {
         console.error(error)
