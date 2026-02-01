@@ -255,7 +255,6 @@ export const createPost = async(req:Request,res:Response) => {
                 content,
                 repo_link,
                 featured_img:result.secure_url,
-                
                 exceprt,
                 status: status || "draft",
                 created_by: user.sub
@@ -285,7 +284,6 @@ export const updatePost = async(req:Request,res:Response) => {
             return res.status(400).json({message:"Invalid Post Id"})
         }
         const userId = req.user!.sub;
-        // const dataToUpdate = req.body;
 
         // Allow only specific fields
         const allowedFields = ["title", "content","exceprt","repo_link "];
@@ -324,6 +322,50 @@ export const updatePost = async(req:Request,res:Response) => {
             console.error("Redis Cache Delete Error",error)
         }
         res.status(200).json(updatePost)
+    } catch (error:any) {
+        console.error(error)
+        res.status(500).json({message:"Internal Server Error"})
+    }
+}
+
+export const deletePost = async(req:Request,res:Response) => {
+    try {
+        const {id} = req.params;
+
+        if(typeof id !== "string") 
+            return res.status(400).json({message:"Invalid Post Id"});
+
+        const userId = req.user!.sub;
+        const deleted = await prisma.post.deleteMany({
+            where:{
+                id,
+                created_by:userId
+            }
+        })
+
+        if(deleted.count === 0){
+            return res
+            .status(403)
+            .json({message:"Post not found or Not Allowed"})
+        }
+        // const post = await prisma.post.findUnique({
+        //     where:{id}
+        // })
+
+        // if(!post) return res.status(404).json({message:"Post Not Found"});
+
+        // if(post.created_by !== userId) return res.status(403).json({message:"You cannot Delete Others Posts"});
+        // await prisma.post.delete({
+        //     where:{id}
+        // })
+        //redis cache invalidation
+        try {
+            await redis.del("posts:p1")
+            console.log("Redis Cache Deleted for Page1")
+        } catch (error:any) {
+            console.error("Redis Cache Delete Error",error)
+        }
+        res.status(204).send()
     } catch (error:any) {
         console.error(error)
         res.status(500).json({message:"Internal Server Error"})
