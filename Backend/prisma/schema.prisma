@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String  @id @default(uuid()) @db.Uuid
+  email      String  @unique
+  full_name  String
+  user_name  String? @unique
+  avatar_url String
+  bio        String?
+  phone      String?
+
+  //Status
+  total_posts          Int @default(0)
+  total_followers      Int @default(0)
+  total_following      Int @default(0)
+  total_likes_received Int @default(0)
+
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  posts      Post[]
+  comments   Comment[]
+  post_likes PostLike[]
+
+  //Follower relation
+  followers Follower[] @relation("UserFollowers")
+  following Follower[] @relation("UserFollowing")
+}
+
+model Post {
+  id           String  @id @default(uuid()) @db.Uuid
+  title        String
+  created_by   String  @db.Uuid
+  user         User    @relation(fields: [created_by], references: [id])
+  content      String
+  repo_link    String?
+  featured_img String
+  exceprt      String? //Summary
+  status       Status  @default(draft)
+
+  //Status
+  view_count     Int @default(0)
+  likes_count    Int @default(0)
+  comments_count Int @default(0)
+
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  comments   Comment[]
+  tags       PostTag[]
+  likes      PostLike[]
+}
+
+model Tag {
+  id         String    @id @default(uuid()) @db.Uuid
+  name       String    @unique
+  slug       String    @unique
+  created_at DateTime  @default(now())
+  posts      PostTag[]
+}
+
+model PostTag {
+  post_id    String   @db.Uuid
+  tag_id     String   @db.Uuid
+  created_at DateTime @default(now())
+  post       Post     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([post_id, tag_id])
+  @@index([tag_id])
+}
+
+model PostLike {
+  id         String   @id @default(uuid()) @db.Uuid
+  post_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now())
+
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id])
+  @@index([user_id])
+}
+
+model Follower {
+  id           String   @id @default(uuid()) @db.Uuid
+  follower_id  String   @db.Uuid
+  following_id String   @db.Uuid
+  created_at   DateTime @default(now())
+
+  follower  User @relation("UserFollowers", fields: [follower_id], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowing", fields: [following_id], references: [id], onDelete: Cascade)
+
+  @@unique([follower_id, following_id])
+  @@index([following_id])
+}
+
+model Comment {
+  id                String    @id @default(uuid()) @db.Uuid
+  content           String
+  post_id           String    @db.Uuid
+  user_id           String    @db.Uuid
+  parent_comment_id String?   @db.Uuid
+  post              Post      @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  author            User      @relation(fields: [user_id], references: [id])
+  parentComment     Comment?  @relation("CommentReplies", fields: [parent_comment_id], references: [id], onDelete: Cascade)
+  replies           Comment[] @relation("CommentReplies")
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  @@index([post_id])
+  @@index([user_id])
+  @@index([parent_comment_id])
+}
+
+enum Status {
+  draft
+  published
+  archived
+}

@@ -1,0 +1,94 @@
+import axios from "axios";
+import jwt from "jsonwebtoken";
+import {prisma} from "../../config/db"
+import { Request,Response } from "express";
+import { config } from "dotenv";
+
+config();
+
+export const googleAuth = (req:Request,res:Response)=>{
+    const redirectUri = "http://localhost:5000/auth/google/callback"
+
+    const url = 
+    "https://accounts.google.com/o/oauth2/v2/auth" +
+    `?client_id=${process.env.GOOGLE_CLIENT_ID}` +
+    `&redirect_uri=${redirectUri}` +
+    `&response_type=code` +
+    `&scope=openid email profile`;
+
+    res.redirect(url);
+}
+
+
+export const googleCallback = async(req:Request,res:Response)=>{
+    const {code} = req.query;
+    try {
+        //Exchange Code for Google Token
+        const tokenRes = await axios.post(
+            "https://oauth2.googleapis.com/token",
+            {
+                client_id: process.env.GOOGLE_CLIENT_ID,
+                client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                redirect_uri: "http://localhost:5000/auth/google/callback",
+                grant_type: "authorization_code",
+                code
+            }
+        );
+
+        const {access_token} = tokenRes.data;
+
+        //Get user info
+        const user_data = await axios.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`
+                }
+            }
+        );
+
+        const {email,name,picture} = user_data.data;
+        let user = await prisma.user.findUnique({
+            where:{email}
+        });
+        if(!user){
+            user = await prisma.user.create({
+                data:{
+                    email:email,
+                    full_name:name,
+                    avatar_url:picture
+                }
+
+            })
+        }
+
+        //Create the JWT 
+        const jwtToken = jwt.sign(
+            {
+              sub: user.id,
+              email:user.email
+            },
+            process.env.JWT_SECRET!,
+            { expiresIn: "1h" }
+        );
+
+        //Set httpOnly cookie
+        res.cookie("access_token",jwtToken,{
+            httpOnly:true,
+            secure:false, //Make sure to change it to true in production
+            sameSite:"lax",
+            maxAge:15*60*1000
+        });
+
+        res.redirect("http://localhost:5173");
+
+    } catch (error:any) {
+        console.error(error);
+        res.status(500).json({"message":"Google auth failed"})
+    }
+}
+
+export const logout = (req:Request,res:Response)=>{
+    res.clearCookie("access_token");
+    res.json({"message":"Logged Out"});
+};
