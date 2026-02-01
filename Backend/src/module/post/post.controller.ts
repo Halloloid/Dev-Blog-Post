@@ -277,3 +277,48 @@ export const createPost = async(req:Request,res:Response) => {
         res.status(500).json({message:"Failed to create the post"})
     }
 };
+
+export const updatePost = async(req:Request,res:Response) => {
+    try {
+        const {id} = req.params;
+        if (typeof id !== "string"){
+            return res.status(400).json({message:"Invalid Post Id"})
+        }
+        const userId = req.user!.sub;
+        // const dataToUpdate = req.body;
+
+        // Allow only specific fields
+        const allowedFields = ["title", "content","exceprt","repo_link "];
+        const dataToUpdate: any = {};
+    
+        for (const field of allowedFields) {
+          if (req.body[field] !== undefined) {
+            dataToUpdate[field] = req.body[field];
+          }
+        }
+    
+        // Prevent empty update
+        if (Object.keys(dataToUpdate).length === 0) {
+          return res.status(400).json({
+            message: "No valid fields provided for update",
+          });
+        }
+        const post = await prisma.post.findUnique({
+            where:{id}
+        })
+
+        if(!post) return res.status(404).json({message:"Post Not Found"});
+
+        if(post.created_by !== userId) return res.status(403).json({message:"You cannot Update Others Posts"});
+
+        const updatePost = await prisma.post.update({
+            where:{id},
+            data:dataToUpdate
+        })
+
+        res.status(200).json(updatePost)
+    } catch (error:any) {
+        console.error(error)
+        res.status(500).json({message:"Internal Server Error"})
+    }
+}
