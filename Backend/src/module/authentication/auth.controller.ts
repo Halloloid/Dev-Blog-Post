@@ -69,7 +69,7 @@ export const googleCallback = async(req:Request,res:Response)=>{
               email:user.email
             },
             process.env.JWT_SECRET!,
-            { expiresIn: "1h" }
+            { expiresIn: "7d" }
         );
 
         //Set httpOnly cookie
