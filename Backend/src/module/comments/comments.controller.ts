@@ -62,6 +62,7 @@ export const addComment = async(req:Request,res:Response) => {
     }
 }
 
+
 export const updateComment = async(req:Request,res:Response) => {
     try {
         const user = req.user as {sub : string}
@@ -106,6 +107,46 @@ export const updateComment = async(req:Request,res:Response) => {
         }
 
         res.status(200).json({ message: "Comment updated" });
+    } catch (error:any) {
+        console.error(error)
+        res.status(500).json({message:"Server Side Error"})
+    }
+}
+
+export const deleteComment = async(req:Request,res:Response) => {
+    try {
+        const user = req.user as {sub : string}
+        if(!user?.sub) return res.status(401).json({message:"Unauthorized"});
+
+        const {commentId} = req.params;
+        if(typeof commentId !== "string") return res.status(400).json({message:"Invalid Id"});
+
+        const existingComment = await prisma.comment.findFirst({
+            where:{
+                id:commentId,
+                user_id:user.sub
+            },
+            select:{
+                id:true,
+                post_id:true
+            }
+        })
+
+        if(!existingComment) return res.status(403).json({message:"Unauthorized Comment Not Found"});
+
+        await prisma.comment.delete({
+            where:{id:existingComment.id},
+        })
+
+        //redis cache invalidation
+        try {
+            await redis.del(`post:${existingComment.post_id}`)
+            console.log("Redis Cache Deleted")
+        } catch (error:any) {
+            console.error("Redis Cache Delete Error",error)
+        }
+
+        res.status(204).send();
     } catch (error:any) {
         console.error(error)
         res.status(500).json({message:"Server Side Error"})
