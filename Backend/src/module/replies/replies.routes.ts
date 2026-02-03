@@ -1,6 +1,6 @@
 import express from "express"
 import { addReply, deleteReply, replies, updateReply } from "./replies.controller"
-import { authMiddleware } from "../middlewares/auth.middleware"
+import { authMiddleware } from "../../middlewares/auth.middleware"
 
 const replyRoutes = express.Router()
 
