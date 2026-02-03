@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "seed:data": "node prisma/seed.ts"
+  "dev": "tsx watch src/index.ts",
+  "build": "tsc && cpx \"src/**/*.lua\" dist",
+  "start": "node dist/index.js",
+  "seed:data": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",

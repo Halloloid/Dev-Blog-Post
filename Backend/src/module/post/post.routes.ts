@@ -1,7 +1,7 @@
 import express from "express"
-import { createPost, deletePost, posts, publishPost, specificPost, updatePost } from "./post.controller"
-import { authMiddleware } from "../../middlewares/auth.middleware"
-import { upload } from "../../middlewares/upload.middleware"
+import { createPost, deletePost, posts, publishPost, specificPost, updatePost } from "./post.controller.js"
+import { authMiddleware } from "../../middlewares/auth.middleware.js"
+import { upload } from "../../middlewares/upload.middleware.js"
 
 
 const postRoutes = express.Router()

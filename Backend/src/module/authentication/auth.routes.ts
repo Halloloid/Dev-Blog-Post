@@ -1,5 +1,5 @@
 import express from "express"
-import { logout,googleAuth,googleCallback } from "./auth.controller"
+import { logout,googleAuth,googleCallback } from "./auth.controller.js"
 
 const authRoutes = express.Router()
 

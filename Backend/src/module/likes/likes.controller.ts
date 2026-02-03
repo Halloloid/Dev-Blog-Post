@@ -1,5 +1,5 @@
 import { Request,Response } from "express";
-import { getLikeCount, isLiked, toggleLike } from "./like.service";
+import { getLikeCount, hydrateLikesIfNeeded, isLiked, toggleLike } from "./like.service.js";
 
 
 export const likeController = async(req:Request,res:Response) => {
@@ -10,6 +10,7 @@ export const likeController = async(req:Request,res:Response) => {
 
         if(!postId || !["like","unlike"].includes(action)) return res.status(400).json({message:"Invalid Request"});
 
+        await hydrateLikesIfNeeded(postId)
         const success = await toggleLike(postId,user.sub,action);
 
         res.status(200).json(success)

@@ -1,5 +1,5 @@
 import express from "express"
-import { publicUserProfile } from "./user.repository"
+import { publicUserProfile } from "./user.repository.js"
 
 const userRoutes = express.Router()
 

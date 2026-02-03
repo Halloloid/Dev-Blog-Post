@@ -1,6 +1,6 @@
 import axios from "axios";
 import jwt from "jsonwebtoken";
-import {prisma} from "../../config/db"
+import {prisma} from "../../config/db.js"
 import { Request,Response } from "express";
 import { config } from "dotenv";
 

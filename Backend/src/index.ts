@@ -1,14 +1,16 @@
 import express,{Request,Response} from "express"
 import { config } from "dotenv";
-import { connectDB,disconnectDB } from "./config/db";
+import { connectDB,disconnectDB } from "./config/db.js";
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import userRoutes from "./module/users/users.routes";
-import postRoutes from "./module/post/post.routes";
-import authRoutes from "./module/authentication/auth.routes";
-import replyRoutes from "./module/replies/replies.routes";
-import commentRoutes from "./module/comments/comments.routes";
-import likeRoutes from "./module/likes/likes.routes";
+import userRoutes from "./module/users/users.routes.js";
+import postRoutes from "./module/post/post.routes.js";
+import authRoutes from "./module/authentication/auth.routes.js";
+import replyRoutes from "./module/replies/replies.routes.js";
+import commentRoutes from "./module/comments/comments.routes.js";
+import likeRoutes from "./module/likes/likes.routes.js";
+import { qstashMiddleware } from "./middlewares/qstash.middleware.js";
+import { syncLikesJob } from "./jobs/syncLikes.js";
 
 config();
 connectDB();
@@ -21,7 +23,11 @@ app.use(cors({
     credentials:true
 }))
 
-app.use(express.json())
+app.use(express.json({
+    verify:(req:any,_res,buf)=>{
+        req.rawBody = buf.toString();
+    }
+}))
 app.use(express.urlencoded({extended:true}))
 
 //api endpoints
@@ -31,6 +37,8 @@ app.use("/api/posts",postRoutes)
 app.use("/api/replies",replyRoutes)
 app.use("/api/comments",commentRoutes)
 app.use("/api/likes",likeRoutes)
+
+app.post("/internal/sync-likes",qstashMiddleware,syncLikesJob)
 
 app.use((_:Request,res:Response)=>{
     res.status(404).json({"Message":"No Such Routes"})

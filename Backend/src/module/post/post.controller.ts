@@ -1,7 +1,7 @@
 import { Request,Response } from "express";
-import { prisma } from "../../config/db";
-import { redis } from "../../config/redis";
-import cloudinary from "../../config/cloudinary";
+import { prisma } from "../../config/db.js";
+import { redis } from "../../config/redis.js";
+import cloudinary from "../../config/cloudinary.js";
 
 export const posts = async(req:Request,res:Response)=>{
     

@@ -5,7 +5,7 @@
 -- ARGV[1] = userId
 -- ARGV[2] = postId
 
-if("SISMEMBER",KEYS[1],ARGV[1]) == 0 then
+if redis.call("SISMEMBER",KEYS[1],ARGV[1]) == 0 then
     return 0
 end
 
