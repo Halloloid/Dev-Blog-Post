@@ -8,6 +8,7 @@ import postRoutes from "./module/post/post.routes";
 import authRoutes from "./module/authentication/auth.routes";
 import replyRoutes from "./module/replies/replies.routes";
 import commentRoutes from "./module/comments/comments.routes";
+import likeRoutes from "./module/likes/likes.routes";
 
 config();
 connectDB();
@@ -19,14 +20,19 @@ app.use(cors({
     origin:"http://localhost:5174",
     credentials:true
 }))
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+
+//api endpoints
 app.use("/auth",authRoutes)
 app.use("/api/users",userRoutes)
 app.use("/api/posts",postRoutes)
 app.use("/api/replies",replyRoutes)
 app.use("/api/comments",commentRoutes)
-app.use((req:Request,res:Response)=>{
+app.use("/api/likes",likeRoutes)
+
+app.use((_:Request,res:Response)=>{
     res.status(404).json({"Message":"No Such Routes"})
 })
 
