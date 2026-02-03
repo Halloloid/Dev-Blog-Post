@@ -11,5 +11,6 @@ replyRoutes.post("/:commentId",authMiddleware,addReply)
 replyRoutes.patch("/:replyId",authMiddleware,updateReply)
 
 replyRoutes.delete("/:replyId",authMiddleware,deleteReply)
+
 export default replyRoutes
 
