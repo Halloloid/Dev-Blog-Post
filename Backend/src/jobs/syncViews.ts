@@ -6,7 +6,7 @@ export const syncViewsToDB = async() => {
     const dirtyPosts = await redis.smembers("views:dirty");
 
     for(const postId of dirtyPosts){
-        const views = Number(await redis.get(`views:posts:${postId}`)) || 0;
+        const views = Number(await redis.get(`views:post:${postId}`)) || 0;
 
         if(views>0){
             await prisma.post.update({
