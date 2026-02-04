@@ -85,7 +85,6 @@ export const toggleLike = async(postId:String,userId:String,action:"like" | "unl
         ],
         [userId,postId]
     )
-
     return result === 1;
 }
 

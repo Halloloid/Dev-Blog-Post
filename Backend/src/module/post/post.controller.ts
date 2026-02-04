@@ -2,6 +2,8 @@ import { Request,Response } from "express";
 import { prisma } from "../../config/db.js";
 import { redis } from "../../config/redis.js";
 import cloudinary from "../../config/cloudinary.js";
+import crypto from "crypto"
+import { trackPostView } from "./view.service.js";
 
 export const posts = async(req:Request,res:Response)=>{
     
@@ -213,6 +215,15 @@ export const specificPost = async(req:Request,res:Response) => {
             ex:600
         })
         res.status(200).json(formattedPost);
+
+
+        const viewerId = req.user?.sub
+            ?? crypto
+                .createHash("sha256")
+                .update(req.ip + (req.headers["user-agent"] || ""))
+                .digest("hex")
+        
+        trackPostView(id,viewerId)
     } catch (error:any) {
         res.status(500).json({message:"Server Error"})
     }

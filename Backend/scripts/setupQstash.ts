@@ -14,6 +14,12 @@ async function setup(){
         cron:"*/5 * * * *"
     });
 
+    await qstash.publishJSON({
+        url:"http://localhost:5000/internal/sync-views",
+        body:{},
+        cron:"*/5 * * * *"
+    });
+
     console.log("QStash sync scheduled")
 }
 

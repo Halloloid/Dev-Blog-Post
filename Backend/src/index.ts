@@ -11,6 +11,7 @@ import commentRoutes from "./module/comments/comments.routes.js";
 import likeRoutes from "./module/likes/likes.routes.js";
 import { qstashMiddleware } from "./middlewares/qstash.middleware.js";
 import { syncLikesJob } from "./jobs/syncLikes.js";
+import { syncViewsToDB } from "./jobs/syncViews.js";
 
 config();
 connectDB();
@@ -37,7 +38,15 @@ app.use("/api/posts",postRoutes)
 app.use("/api/replies",replyRoutes)
 app.use("/api/comments",commentRoutes)
 app.use("/api/likes",likeRoutes)
-
+app.post("/internal/sync-views", qstashMiddleware, async (req, res) => {
+    try {
+        await syncViewsToDB();
+        res.status(200).json({ message: "Views synced successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to sync views" });
+    }
+});
 app.post("/internal/sync-likes",qstashMiddleware,syncLikesJob)
 
 app.use((_:Request,res:Response)=>{
