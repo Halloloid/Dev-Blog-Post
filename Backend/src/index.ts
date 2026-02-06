@@ -12,6 +12,7 @@ import likeRoutes from "./module/likes/likes.routes.js";
 import { qstashMiddleware } from "./middlewares/qstash.middleware.js";
 import { syncLikesJob } from "./jobs/syncLikes.js";
 import { syncViewsToDB } from "./jobs/syncViews.js";
+import followerRoute from "./module/followers/followers.routes.js";
 
 config();
 connectDB();
@@ -38,6 +39,7 @@ app.use("/api/posts",postRoutes)
 app.use("/api/replies",replyRoutes)
 app.use("/api/comments",commentRoutes)
 app.use("/api/likes",likeRoutes)
+app.use("/api/follow",followerRoute)
 app.post("/internal/sync-views", qstashMiddleware, async (req, res) => {
     try {
         await syncViewsToDB();
