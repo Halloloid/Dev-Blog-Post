@@ -1,6 +1,5 @@
 import { Request,Response } from "express";
 import { prisma } from "../../config/db.js";
-import { count } from "console";
 
 export const followtoggle = async(req:Request,res:Response) => {
     try {
