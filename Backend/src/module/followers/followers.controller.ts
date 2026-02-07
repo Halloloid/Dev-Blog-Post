@@ -1,5 +1,6 @@
 import { Request,Response } from "express";
 import { prisma } from "../../config/db.js";
+import { count } from "console";
 
 export const followtoggle = async(req:Request,res:Response) => {
     try {
@@ -76,16 +77,64 @@ export const followtoggle = async(req:Request,res:Response) => {
 
 export const getMyFollowers = async(req:Request,res:Response) => {
     try {
-        
+        const user = req.user as { sub:string }
+        if(!user?.sub) return res.status(401).json({message:"Unauthorized"});
+
+        const followers = await prisma.follower.findMany({
+            where:{following_id:user.sub},
+            include:{
+                follower:{
+                    select:{
+                        id:true,
+                        full_name:true,
+                        user_name:true,
+                        avatar_url:true
+                    }
+                }
+            },
+            orderBy:{
+                created_at:"desc"
+            }
+        })
+
+        return res.status(200).json({
+            count:followers.length,
+            followers:followers.map(f=>f.follower)
+        })
     } catch (error:any) {
-        
+        console.error(error)
+        return res.status(500).json({ message: "Internal server error" })
     }
 }
 
 export const getMyFollowing = async(req:Request,res:Response) => {
     try {
-        
+         const user = req.user as { sub:string }
+        if(!user?.sub) return res.status(401).json({message:"Unauthorized"});
+
+        const following = await prisma.follower.findMany({
+            where:{follower_id:user.sub},
+            include:{
+                following:{
+                    select:{
+                        id:true,
+                        full_name:true,
+                        user_name:true,
+                        avatar_url:true,
+                    }
+                }
+            },
+            orderBy:{
+                created_at:"desc"
+            }
+        })
+
+        return res.status(200).json({
+            count: following.length,
+            following: following.map(f => f.following)
+        })
     } catch (error:any) {
-        
+        console.error(error)
+        return res.status(500).json({ message: "Internal server error" })
     }
 }
