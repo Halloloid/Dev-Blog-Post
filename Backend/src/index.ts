@@ -13,6 +13,7 @@ import { qstashMiddleware } from "./middlewares/qstash.middleware.js";
 import { syncLikesJob } from "./jobs/syncLikes.js";
 import { syncViewsToDB } from "./jobs/syncViews.js";
 import followerRoute from "./module/followers/followers.routes.js";
+import { combinedRateLimiter } from "./middlewares/rateLimiter.middleware.js";
 
 config();
 connectDB();
@@ -31,6 +32,9 @@ app.use(express.json({
     }
 }))
 app.use(express.urlencoded({extended:true}))
+
+//Rate Limiting the APIs
+app.use("/api",combinedRateLimiter)
 
 //api endpoints
 app.use("/auth",authRoutes)
