@@ -3,25 +3,42 @@ import jwt from "jsonwebtoken";
 import {prisma} from "../../config/db.js"
 import { Request,Response } from "express";
 import { config } from "dotenv";
+import crypto from "crypto"
 
 config();
 
 export const googleAuth = (req:Request,res:Response)=>{
-    const redirectUri = "http://localhost:5000/auth/google/callback"
+
+    const state = crypto.randomBytes(32).toString('hex')
+
+    res.cookie('oauth_state',state,{
+        httpOnly:true,
+        secure:process.env.NODE_ENV === 'production',
+        maxAge:10*60*1000
+    })
+
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI
 
     const url = 
     "https://accounts.google.com/o/oauth2/v2/auth" +
     `?client_id=${process.env.GOOGLE_CLIENT_ID}` +
     `&redirect_uri=${redirectUri}` +
     `&response_type=code` +
-    `&scope=openid email profile`;
+    `&scope=openid email profile`+
+    `&state=${state}`
 
     res.redirect(url);
 }
 
 
 export const googleCallback = async(req:Request,res:Response)=>{
-    const {code} = req.query;
+    const {code,state} = req.query;
+
+    const savedState = req.cookies.oauth_state;
+
+    if(!state || state !== savedState) return res.status(403).json({message:"Invalid state Parameter"});
+
+    res.clearCookie('oauth_state')
     try {
         //Exchange Code for Google Token
         const tokenRes = await axios.post(
@@ -29,7 +46,7 @@ export const googleCallback = async(req:Request,res:Response)=>{
             {
                 client_id: process.env.GOOGLE_CLIENT_ID,
                 client_secret: process.env.GOOGLE_CLIENT_SECRET,
-                redirect_uri: "http://localhost:5000/auth/google/callback",
+                redirect_uri: process.env.GOOGLE_REDIRECT_URI,
                 grant_type: "authorization_code",
                 code
             }
@@ -69,7 +86,7 @@ export const googleCallback = async(req:Request,res:Response)=>{
               email:user.email
             },
             process.env.JWT_SECRET!,
-            { expiresIn: "7d" }
+            { expiresIn: "1h" }
         );
 
         //Set httpOnly cookie
@@ -77,10 +94,10 @@ export const googleCallback = async(req:Request,res:Response)=>{
             httpOnly:true,
             secure:false, //Make sure to change it to true in production
             sameSite:"lax",
-            maxAge:15*60*1000
+            maxAge:60*60*1000
         });
 
-        res.redirect("http://localhost:5173");
+        res.redirect(process.env.FRONTEND_URL!);
 
     } catch (error:any) {
         console.error(error);
