@@ -243,6 +243,10 @@ export const createPost = async(req:Request,res:Response) => {
         }
 
 
+        if(!req.file.mimetype.startsWith('image/')) return res.status(400).json({message:"Only Image is allowed"});
+
+        //Check Size
+        if(req.file.size>5*1024*1024) return res.status(400).json({message:"File Too Large(Max 5MB)"});
         //As Cloudinary uses Streams; inMemoryStorage we need a small helper
         const streamUpload = (fileBuffer:Buffer) => {
             return new Promise<any>((resolve,reject)=>{
@@ -289,7 +293,7 @@ export const updatePost = async(req:Request,res:Response) => {
         const userId = req.user!.sub;
 
         // Allow only specific fields
-        const allowedFields = ["title", "content","exceprt","repo_link "];
+        const allowedFields = ["title", "content","exceprt","repo_link"];
         const dataToUpdate: any = {};
     
         for (const field of allowedFields) {
@@ -320,6 +324,7 @@ export const updatePost = async(req:Request,res:Response) => {
         //redis cache invalidation
         try {
             await redis.del("posts:p1")
+            await redis.del(`post:${id}`)
             console.log("Redis Cache Deleted for Page1")
         } catch (error:any) {
             console.error("Redis Cache Delete Error",error)
