@@ -16,7 +16,7 @@ export const trackPostView = async(postId:string,viewerId:string) => {
             [
                 `views:post:${postId}`,
                 `views:post:${postId}:seen`,
-                "view:dirty"
+                "views:dirty"
             ],
             [
                 viewerId,
