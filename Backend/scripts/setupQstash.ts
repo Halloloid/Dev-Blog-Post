@@ -8,17 +8,18 @@ const qstash = new Client({
 })
 
 async function setup(){
-    await qstash.publishJSON({
-        url:"https://dev-blog-post.onrender.com/internal/sync-likes",
-        body:{},
-        cron:"*/5 * * * *"
-    });
+    await qstash.schedules.create({
+    destination: "https://dev-blog-post.onrender.com/internal/sync-likes",
+    cron: "*/5 * * * *",
+    method:"POST"
+});
 
-    await qstash.publishJSON({
-        url:"https://dev-blog-post.onrender.com/internal/sync-views",
-        body:{},
-        cron:"*/5 * * * *"
-    });
+await qstash.schedules.create({
+    destination: "https://dev-blog-post.onrender.com/internal/sync-views",
+    cron: "*/5 * * * *",
+    method:"POST"
+});
+
 
     console.log("QStash sync scheduled")
 }
