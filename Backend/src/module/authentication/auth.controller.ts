@@ -17,7 +17,7 @@ export const googleAuth = (req:Request,res:Response)=>{
         maxAge:10*60*1000
     })
 
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/auth/google/callback"
 
     const url = 
     "https://accounts.google.com/o/oauth2/v2/auth" +
@@ -46,7 +46,7 @@ export const googleCallback = async(req:Request,res:Response)=>{
             {
                 client_id: process.env.GOOGLE_CLIENT_ID,
                 client_secret: process.env.GOOGLE_CLIENT_SECRET,
-                redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+                redirect_uri: process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/auth/google/callback",
                 grant_type: "authorization_code",
                 code
             }
