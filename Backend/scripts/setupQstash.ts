@@ -9,13 +9,13 @@ const qstash = new Client({
 
 async function setup(){
     await qstash.publishJSON({
-        url:"http://localhost:5000/internal/sync-likes",
+        url:"https://dev-blog-post.onrender.com/internal/sync-likes",
         body:{},
         cron:"*/5 * * * *"
     });
 
     await qstash.publishJSON({
-        url:"http://localhost:5000/internal/sync-views",
+        url:"https://dev-blog-post.onrender.com/internal/sync-views",
         body:{},
         cron:"*/5 * * * *"
     });
