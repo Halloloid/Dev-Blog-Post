@@ -5,12 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc && cpx \"src/**/*.lua\" dist",
+    "build": "prisma generate && tsc && cpx \"src/**/*.lua\" dist",
     "start": "node dist/index.js",
-    "postinstall": "prisma generate",
-    "seed:data": "tsx prisma/seed.ts",
-    "typecheck":"tsc --noEmit",
-    "render-build":"npm ci && npx prisma generate && npx prisma migrate deploy && npm run build"
+    "seed:data": "tsx prisma/seed.ts"
   },
   "keywords": ["blog","api","backend"],
   "author": "",
