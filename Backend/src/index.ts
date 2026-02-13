@@ -35,7 +35,9 @@ app.use(express.urlencoded({extended:true}))
 
 //Rate Limiting the APIs
 app.use("/api",combinedRateLimiter)
-
+app.use("/api/hello",async(req:Request,res:Response)=>{
+    res.status(200).json({message:"APIs are working"})
+})
 //api endpoints
 app.use("/auth",authRoutes)
 app.use("/api/users",userRoutes)
