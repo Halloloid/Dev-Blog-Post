@@ -16,12 +16,12 @@ const Home = () => {
           <MarqueeDemo/>
         </div>
       </div>
-    <div className="relative flex justify-center items-center gap-10 top-10 ">
+    <div className="relative flex justify-center items-center gap-5 top-12 mr-2">
     <FlipButton>
       <FlipButtonFront className="bg-amber-50 p-2 ps-5 pe-5 rounded-xl">Make a Post</FlipButtonFront>
       <FlipButtonBack>Make a Post</FlipButtonBack>
     </FlipButton>
-    <RadixHoverCardDemo></RadixHoverCardDemo>
+    x<RadixHoverCardDemo/>x
     <LiquidButton className="w-max p-5 ps-7 pe-7">See Posts</LiquidButton>
     </div>
     <Skiper28/>

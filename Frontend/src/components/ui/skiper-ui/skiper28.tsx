@@ -23,9 +23,9 @@ const Skiper28 = () => {
     <ReactLenis root>
       <div
         ref={targetRef}
-        className="relative top-18 z-0 h-[350vh] w-screen bg-[#020800] text-black"
+        className="relative top-2 z-0 h-[350vh] w-screen bg-[#020800] text-black caret-top"
       >
-        <div className="absolute left-1/2 top-[3%] grid -translate-x-1/2 content-start justify-items-center gap-6 text-center text-white">
+        <div className="absolute left-1/2 top-[5%] grid -translate-x-1/2 content-start justify-items-center gap-6 text-center text-white">
           <span className="relative max-w-[12ch] text-xs uppercase leading-tight opacity-40 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:from-white after:to-black after:content-['']">
             scroll down
           </span>

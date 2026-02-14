@@ -140,3 +140,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Caret shape (^) */
+.caret-top {
+  clip-path: polygon(0% 0%, 50% 80px, 100% 0%, 100% 100%, 0% 100%);
+}
+
+/* Hide scrollbars */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
