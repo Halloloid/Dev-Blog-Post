@@ -23,18 +23,18 @@ const Skiper28 = () => {
     <ReactLenis root>
       <div
         ref={targetRef}
-        className="relative top-75 z-0 h-[350vh] w-screen bg-[#020800] text-black"
+        className="relative top-18 z-0 h-[350vh] w-screen bg-[#020800] text-black"
       >
-        <div className="absolute left-1/2 top-[2%] grid -translate-x-1/2 content-start justify-items-center gap-6 text-center text-white">
+        <div className="absolute left-1/2 top-[3%] grid -translate-x-1/2 content-start justify-items-center gap-6 text-center text-white">
           <span className="relative max-w-[12ch] text-xs uppercase leading-tight opacity-40 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:from-white after:to-black after:content-['']">
-            scroll down to see some awesome
+            scroll down
           </span>
         </div>
         <div
           className="sticky top-0 mx-auto flex justify-center items-center bg-transparent py-0"
           style={{
             transformStyle: "preserve-3d",
-            perspective: "195px",
+            perspective: "200px",
           }}
         >
           <motion.div
