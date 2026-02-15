@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import React from "react";
-
 import { cn } from "@/lib/utils";
+import {Link} from "react-router-dom"
 
 const navigationItems = [
   {
@@ -33,8 +33,9 @@ const navigationItems = [
   },
   {
     name: "Login",
-    href: "/login",
+    href: "https://dev-blog-post.onrender.com/auth/google",
     description: "[7]",
+    external:true
   },
 ];
 
@@ -47,13 +48,27 @@ export const Skiper58 = () => {
           key={index}
         >
           <div className="relative flex items-start">
-            <TextRoll
-              center
-              className="text-4xl font-extrabold uppercase leading-[0.8] tracking-[-0.03em] transition-colors lg:text-5xl"
-            >
-              {item.name}
-            </TextRoll>
-          </div>
+  {item.external ? (
+    <a href={item.href}>
+      <TextRoll
+        center
+        className="text-4xl font-extrabold uppercase leading-[0.8] tracking-[-0.03em] transition-colors lg:text-5xl"
+      >
+        {item.name}
+      </TextRoll>
+    </a>
+  ) : (
+    <Link to={item.href}>
+      <TextRoll
+        center
+        className="text-4xl font-extrabold uppercase leading-[0.8] tracking-[-0.03em] transition-colors lg:text-5xl"
+      >
+        {item.name}
+      </TextRoll>
+    </Link>
+  )}
+</div>
+
         </li>
       ))}
     </ul>
