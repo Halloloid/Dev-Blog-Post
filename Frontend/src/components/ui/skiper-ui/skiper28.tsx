@@ -42,7 +42,7 @@ const Skiper28 = () => {
               transformStyle: "preserve-3d",
               transform,
             }}
-            className="font-geist w-full max-w-4xl text-center text-6xl font-bold tracking-tighter text-[#2bff00]"
+            className="font-geist w-full max-w-4xl text-center text-6xl font-bold tracking-tighter text-land"
           >
             Let the world see your blogs and projects in a new way.An old-school
             developer blog style where posts stack over time.Built by developers,
