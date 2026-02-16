@@ -1,5 +1,4 @@
 import {Eye,Heart,MessageCircle} from "lucide-react"
-import { ShineBorder } from "./ui/shine-border";
 
 interface CardProps{
     title:string;
@@ -13,7 +12,7 @@ interface CardProps{
 const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt}:CardProps) => {
   return (
     <div className="group relative flex w-full max-w-4xl h-64 overflow-hidden rounded-xl border border-vio/30 bg-gray-950">
-      <ShineBorder shineColor="#FF00FF" borderWidth={1} />
+      
       {/* Image Section */}
       <div className="relative w-80 shrink-0 overflow-hidden">
         <img
@@ -24,7 +23,6 @@ const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt}
         {/* Magenta overlay on hover */}
         <div className="absolute inset-0 bg-vio/0 transition-colors duration-500 group-hover:bg-vio/10" />
         {/* Right fade into card */}
-        {/* <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card" /> */}
       </div>
 
       {/* Content Section */}

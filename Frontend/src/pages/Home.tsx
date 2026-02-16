@@ -1,12 +1,18 @@
 import Card from "@/components/Card"
+import SearchBar from "@/components/SearchBar"
 
 const Home = () => {
   return (
     <>
     <div>
       <nav>aa</nav>
-      <div>
-        
+      <div className="grid grid-cols-10">
+        <div className="-ms-125 col-span-7">
+          <SearchBar/>
+        </div>
+        <div>
+          hsjfhjfh
+        </div>
       </div>
     <div className="grid grid-cols-10">
       <div className="col-span-4">
