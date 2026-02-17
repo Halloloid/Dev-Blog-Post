@@ -11,7 +11,7 @@ interface CardProps{
 
 const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt}:CardProps) => {
   return (
-    <div className="group relative flex w-full max-w-4xl h-64 overflow-hidden rounded-xl border border-vio/30 bg-gray-950">
+    <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950 mb-8">
       
       {/* Image Section */}
       <div className="relative w-80 shrink-0 overflow-hidden">

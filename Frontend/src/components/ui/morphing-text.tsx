@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef } from "react"
 
 import { cn } from "@/lib/utils"
 
-const morphTime = 1.5
-const cooldownTime = 0.5
+const morphTime = 3
+const cooldownTime = 1
 
 const useMorphingText = (texts: string[]) => {
   const textIndexRef = useRef(0)
@@ -137,7 +137,7 @@ export const MorphingText: React.FC<MorphingTextProps> = ({
 }) => (
   <div
     className={cn(
-      "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] leading-none font-bold [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[2.5rem]",
+      "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] leading-none font-bold text-vio [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[2rem]",
       className
     )}
   >

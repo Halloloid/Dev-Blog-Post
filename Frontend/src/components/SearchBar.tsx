@@ -44,7 +44,7 @@ const SearchBar = () => {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="relative w-full max-w-lg mx-auto">
+    <div ref={wrapperRef} className="relative w-175 mx-auto">
       <div className="relative">
           <ShineBorder/>
         <Search
