@@ -14,6 +14,7 @@ import { syncLikesJob } from "./jobs/syncLikes.js";
 import { syncViewsToDB } from "./jobs/syncViews.js";
 import followerRoute from "./module/followers/followers.routes.js";
 import { combinedRateLimiter } from "./middlewares/rateLimiter.middleware.js";
+import tagsRoute from "./module/tags/tags.routes.js";
 
 config();
 connectDB();
@@ -46,6 +47,7 @@ app.use("/api/replies",replyRoutes)
 app.use("/api/comments",commentRoutes)
 app.use("/api/likes",likeRoutes)
 app.use("/api/follow",followerRoute)
+app.use("/api/tags",tagsRoute)
 app.post("/internal/sync-views", qstashMiddleware, async (req, res) => {
     try {
         await syncViewsToDB();
