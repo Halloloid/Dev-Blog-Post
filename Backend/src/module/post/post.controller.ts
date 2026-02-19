@@ -54,14 +54,19 @@ export const posts = async(req:Request,res:Response)=>{
             ]
         }
         
-        // Redis Cache for First Page
-        const isFirstPage = safePage === 1;
+        // Redis Cache for Home Page
+        const shouldCahce = 
+            safePage === 1 &&
+            !q &&
+            tags.length === 0 &&
+            sortBy === "created_at" &&
+            sortOrder === "desc";
 
-        const cacheKey = isFirstPage 
-            ? `posts:p1`
+        const cacheKey = shouldCahce  
+            ? `posts:homepage`
             : null;
 
-        if(isFirstPage){
+        if(shouldCahce){
             const cachedData = await redis.get(cacheKey!);
             if(cachedData){
                 return res.status(200).json(cachedData);
@@ -116,7 +121,7 @@ export const posts = async(req:Request,res:Response)=>{
         }
 
         //Save to Redis
-        if(isFirstPage){
+        if(shouldCahce){
             await redis.set(cacheKey!,responsePayload,{
                 ex:300
             })
@@ -323,7 +328,7 @@ export const updatePost = async(req:Request,res:Response) => {
 
         //redis cache invalidation
         try {
-            await redis.del("posts:p1")
+            await redis.del("posts:homepage")
             await redis.del(`post:${id}`)
             console.log("Redis Cache Deleted for Page1")
         } catch (error:any) {
@@ -357,7 +362,7 @@ export const deletePost = async(req:Request,res:Response) => {
             .json({message:"Post not found or Not Allowed"})
         }
         try {
-            await redis.del("posts:p1")
+            await redis.del("posts:homepage")
             console.log("Redis Cache Deleted for Page1")
         } catch (error:any) {
             console.error("Redis Cache Delete Error",error)
@@ -392,7 +397,7 @@ export const publishPost = async(req:Request,res:Response) => {
         }
 
         try {
-            await redis.del("posts:p1")
+            await redis.del("posts:homepage")
             console.log("Redis Cache Deleted for Page1")
         } catch (error:any) {
             console.error("Redis Cache Delete Error",error)
