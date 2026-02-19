@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Search } from "lucide-react";
 import { ShineBorder } from "./ui/shine-border";
 
@@ -20,8 +20,12 @@ const SAMPLE_ITEMS = [
   "Cloud Computing",
 ];
 
-const SearchBar = () => {
-  const [query, setQuery] = useState("");
+interface SearchBarProps {
+  query:string;
+  setQuery:React.Dispatch<React.SetStateAction<string>>;
+}
+
+const SearchBar = ({query,setQuery}:SearchBarProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 

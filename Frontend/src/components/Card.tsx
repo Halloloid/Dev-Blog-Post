@@ -1,6 +1,7 @@
 import {Eye,Heart,MessageCircle} from "lucide-react"
 
 export interface CardProps{
+    id:string;
     title:string;
     featured_img:string;
     view_count:number;
@@ -45,7 +46,7 @@ const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt}
       </div>
 
       {/* Bottom magenta glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-vio/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-liinear-to-r from-transparent via-vio/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     </div>
   )
 }

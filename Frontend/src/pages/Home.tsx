@@ -6,7 +6,7 @@ import { MorphingText } from "@/components/ui/morphing-text"
 import { RainbowButton } from "@/components/ui/rainbow-button"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import api from "@/config/api"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { type CardProps } from "@/components/Card"
 
 const tags = ["React", "Next.js", "TypeScript", "Tailwind", "Node.js", "MongoDB"]
@@ -15,13 +15,16 @@ const Home = () => {
   const [currenrPage,setcurrentPage] = useState(1);
   const [totalPage,settotalPage] = useState(10);
   const [limit,setlimit] = useState(5);
+  const [query,setQuery] = useState<string>("");
   const [posts,setposts] = useState<CardProps[]>([]);
+  const cardsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(()=>{
     const fetchData = async() => {
       try {
         const resposne = await api.get("/api/posts",{
           params:{
+            q:query,
             page:currenrPage,
             limit:limit
           }
@@ -29,14 +32,21 @@ const Home = () => {
         settotalPage(resposne.data.totalPages);
         setlimit(resposne.data.perPage);
         setposts(resposne.data.data)
-        console.log(resposne);
         
       } catch (error) {
         console.error("Error in API call:-",error)
       }
     }
     fetchData();
-  },[currenrPage,limit]);
+  },[currenrPage,limit,query]);
+  
+  useEffect(() => {
+  cardsRef.current?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}, [currenrPage]);
+
 
   const handleNext = () => {
     if(currenrPage < totalPage){
@@ -65,7 +75,7 @@ const Home = () => {
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-10 mt-8">
         <div className="w-full sm:w-1/2">
-          <SearchBar />
+          <SearchBar query={query} setQuery={setQuery}/>
         </div>
         <div className="flex gap-3">
           <ShimmerButton>Most Liked</ShimmerButton>
@@ -100,9 +110,11 @@ const Home = () => {
         </aside>
 
         {/* Cards */}
-        <main className="col-span-7 flex flex-col gap-5 pr-4 pb-10">
+        <main ref={cardsRef} className="col-span-7 flex flex-col gap-5 pr-4 pb-10">
           {posts.map((i) => (
             <Card
+              key={i.id}
+              id={i.id}
               title={i.title}
               featured_img={i.featured_img}
               view_count={i.view_count}
