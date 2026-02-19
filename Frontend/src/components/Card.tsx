@@ -1,4 +1,6 @@
 import {Eye,Heart,MessageCircle} from "lucide-react"
+import { type Tag } from "@/pages/Home"
+
 
 export interface CardProps{
     id:string;
@@ -7,10 +9,11 @@ export interface CardProps{
     view_count:number;
     likes_count:number;
     comments_count:number;
+    tags:Tag[];
     exceprt?:string;
 }
 
-const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt}:CardProps) => {
+const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt,tags}:CardProps) => {
   return (
     <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950">
       
@@ -35,6 +38,16 @@ const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt}
           <p className="text-sm text-white/60 leading-relaxed line-clamp-3">
             {exceprt || "View More"}
           </p>
+          <div className="flex flex-row gap-1.5 text-sm text-gray-400 mt-10">
+  tags:
+  {tags.map((t, index) => (
+    <span key={t.id}>
+      {t.name}
+      {index !== tags.length - 1 && ", "}
+    </span>
+  ))}
+</div>
+
         </div>
 
         {/* Stats Row */}

@@ -9,7 +9,7 @@ import api from "@/config/api"
 import { useEffect, useRef, useState } from "react"
 import { type CardProps } from "@/components/Card"
 
-type Tag = {
+export type Tag = {
   id:string,
   name:string,
   slug:string
@@ -148,6 +148,7 @@ const Home = () => {
               comments_count={i.comments_count}
               likes_count={i.likes_count}
               exceprt={i.exceprt}
+              tags={i.tags}
             />
           ))}
         </main>
