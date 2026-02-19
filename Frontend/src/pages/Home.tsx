@@ -9,13 +9,20 @@ import api from "@/config/api"
 import { useEffect, useRef, useState } from "react"
 import { type CardProps } from "@/components/Card"
 
-const tags = ["React", "Next.js", "TypeScript", "Tailwind", "Node.js", "MongoDB"]
+type Tag = {
+  id:string,
+  name:string,
+  slug:string
+}
 
 const Home = () => {
   const [currenrPage,setcurrentPage] = useState(1);
   const [totalPage,settotalPage] = useState(10);
   const [limit,setlimit] = useState(5);
   const [query,setQuery] = useState<string>("");
+  const [tags,setTags] = useState<Tag[]>([]);
+  const [selectedTag,setSelecetdTag] = useState("");
+  const [sortBy,setSortBy] = useState<string>("created_at");
   const [posts,setposts] = useState<CardProps[]>([]);
   const cardsRef = useRef<HTMLDivElement | null>(null);
 
@@ -24,6 +31,8 @@ const Home = () => {
       try {
         const resposne = await api.get("/api/posts",{
           params:{
+            tags:selectedTag,
+            sortBy:sortBy,
             q:query,
             page:currenrPage,
             limit:limit
@@ -32,13 +41,14 @@ const Home = () => {
         settotalPage(resposne.data.totalPages);
         setlimit(resposne.data.perPage);
         setposts(resposne.data.data)
-        
+        const tagRes = await api.get("/api/tags");
+        setTags(tagRes.data)
       } catch (error) {
         console.error("Error in API call:-",error)
       }
     }
     fetchData();
-  },[currenrPage,limit,query]);
+  },[currenrPage,limit,query,sortBy,selectedTag]);
   
   useEffect(() => {
   cardsRef.current?.scrollIntoView({
@@ -52,6 +62,22 @@ const Home = () => {
     if(currenrPage < totalPage){
       setcurrentPage((prev)=>prev+1)
     }
+  }
+
+  const handleMostLiked = () => {
+    setSortBy("likes_count")
+  }
+
+  const handleMostViewed = () => {
+    setSortBy("view_count")
+  }
+
+  const handleRecent = () => {
+    setSortBy("created_at")
+  }
+
+  const handleSlectedTag = (slug:string) => {
+    setSelecetdTag(slug)
   }
 
   const handlePrev = () => {
@@ -78,9 +104,9 @@ const Home = () => {
           <SearchBar query={query} setQuery={setQuery}/>
         </div>
         <div className="flex gap-3">
-          <ShimmerButton>Most Liked</ShimmerButton>
-          <ShimmerButton>Most Viewed</ShimmerButton>
-          <ShimmerButton>Recent</ShimmerButton>
+          <ShimmerButton onClick={handleMostLiked}>Most Liked</ShimmerButton>
+          <ShimmerButton onClick={handleMostViewed}>Most Viewed</ShimmerButton>
+          <ShimmerButton onClick={handleRecent}>Recent</ShimmerButton>
         </div>
       </div>
 
@@ -98,12 +124,13 @@ const Home = () => {
           <div className="flex flex-col gap-3">
             {tags.map((tag) => (
               <button
-                key={tag}
+                key={tag.id}
                 className="w-full py-2 px-4 rounded-lg border border-fuchsia-500/40 text-fuchsia-300 text-sm font-medium
                            bg-fuchsia-500/5 hover:bg-fuchsia-500/20 hover:border-fuchsia-400 hover:text-white
                            hover:shadow-[0_0_12px_rgba(217,70,239,0.4)] transition-all duration-200 cursor-pointer"
+                onClick={() => handleSlectedTag(tag.slug)}
               >
-                # {tag}
+                # {tag.name}
               </button>
             ))}
           </div>
