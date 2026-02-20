@@ -1,5 +1,6 @@
 import {Eye,Heart,MessageCircle} from "lucide-react"
 import { type Tag } from "@/pages/Home"
+import { useNavigate } from "react-router-dom";
 
 
 export interface CardProps{
@@ -13,9 +14,15 @@ export interface CardProps{
     exceprt?:string;
 }
 
-const Card = ({title,featured_img,view_count,likes_count,comments_count,exceprt,tags}:CardProps) => {
+
+const Card = ({id,title,featured_img,view_count,likes_count,comments_count,exceprt,tags}:CardProps) => {
+  const navigate = useNavigate();
+  const naviagetToPost = async(id:string) => {
+    navigate(`/post/${id}`)
+  }
+
   return (
-    <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950">
+    <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950" onClick={()=>naviagetToPost(id)}>
       
       {/* Image Section */}
       <div className="relative w-80 shrink-0 overflow-hidden">

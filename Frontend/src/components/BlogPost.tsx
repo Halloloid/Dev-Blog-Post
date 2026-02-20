@@ -12,7 +12,8 @@ interface Tag {
 
 interface User {
   id: string;
-  full_name: string;
+  user_name: string;
+  avatar_url:string;
 }
 
 interface PostComment {
@@ -20,6 +21,7 @@ interface PostComment {
   content: string;
   author: User;
   created_at: string;
+  repliesCount:number;
   replies: PostComment[];
 }
 
@@ -40,44 +42,13 @@ interface BlogPostData {
 
 interface BlogPostProps {
   post: BlogPostData;
+  comments: PostComment[];
 }
 
-function BlogPost({ post }: BlogPostProps) {
+function BlogPost({ post,comments}: BlogPostProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes_count);
   const [visibleReplies, setVisibleReplies] = useState<Set<string>>(new Set());
-  const [comments, setComments] = useState<PostComment[]>([
-    {
-      id: '1',
-      content: 'This is an excellent tutorial! I was able to understand generics much better after reading this. The examples are crystal clear.',
-      author: { id: '1', full_name: 'Sarah Chen' },
-      created_at: '2 days ago',
-      replies: [
-        {
-          id: '2',
-          content: 'Thanks Sarah! Glad it helped. Feel free to reach out if you have any questions about advanced generic patterns.',
-          author: post.user,
-          created_at: '2 days ago',
-          replies: []
-        }
-      ]
-    },
-    {
-      id: '3',
-      content: 'How would you handle generic constraints with multiple types? Would love to see more examples.',
-      author: { id: '3', full_name: 'Mike Rodriguez' },
-      created_at: '1 day ago',
-      replies: [
-        {
-          id: '4',
-          content: 'Great question! That\'s actually covered in the constraints section. You can use `extends` keyword to define multiple type constraints.',
-          author: post.user,
-          created_at: '1 day ago',
-          replies: []
-        }
-      ]
-    }
-  ]);
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -92,62 +63,10 @@ function BlogPost({ post }: BlogPostProps) {
     }
   };
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (comment.trim()) {
-      const newComment: PostComment = {
-        id: Date.now().toString(),
-        content: comment,
-        author: { id: 'current-user', full_name: 'You' },
-        created_at: 'just now',
-        replies: []
-      };
-      setComments([...comments, newComment]);
-      setComment('');
-    }
-  };
-
-  const handleReplySubmit = (e: React.FormEvent, commentId: string) => {
-  e.preventDefault();
-
-  if (!replyText.trim()) return;
-
-  const updated = comments.map((c) => {
-    if (c.id === commentId) {
-      return {
-        ...c,
-        replies: [
-          ...c.replies,
-          {
-            id: Date.now().toString(),
-            content: replyText,
-            author: { id: "current-user", full_name: "You" },
-            created_at: "just now",
-            replies: [], // replies of replies NOT allowed
-          },
-        ],
-      };
-    }
-    return c;
-  });
-
-  setComments(updated);
-  setReplyingTo(null);
-  setReplyText("");
-};
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
   };
 
   const renderComments = (commentsList: PostComment[]) => {
@@ -160,17 +79,16 @@ function BlogPost({ post }: BlogPostProps) {
           <div key={comment.id}>
             <div className="border border-gray-800 rounded-lg p-6 bg-black/30">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-linear-to-br from-land to-vio flex items-center justify-center font-mono font-bold text-black shrink-0">
-                  {getInitials(comment.author.full_name)}
-                </div>
+                  <img src={comment.author.avatar_url} className='w-10 h-10 rounded-full flex items-center justify-center'/>
+                
 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="font-bold text-land">
-                      {comment.author.full_name}
+                      {comment.author.user_name}
                     </span>
                     <span className="text-sm text-gray-500 font-mono">
-                      {comment.created_at}
+                      {formatDate(comment.created_at)}
                     </span>
                   </div>
 
@@ -192,7 +110,7 @@ function BlogPost({ post }: BlogPostProps) {
                       Reply
                     </button>
 
-                    {comment.replies.length > 0 && (
+                    {comment.repliesCount > 0 && (
                       <button
                         onClick={() => {
                           const newSet = new Set(visibleReplies);
@@ -207,7 +125,7 @@ function BlogPost({ post }: BlogPostProps) {
                       >
                         {repliesVisible
                           ? "Hide replies"
-                          : `View replies (${comment.replies.length})`}
+                          : `View replies (${comment.repliesCount})`}
                       </button>
                     )}
                   </div>
@@ -215,9 +133,6 @@ function BlogPost({ post }: BlogPostProps) {
                   {/* Reply Form */}
                   {replyingTo === comment.id && (
                     <form
-                      onSubmit={(e) =>
-                        handleReplySubmit(e, comment.id)
-                      }
                       className="mt-4 pt-4 border-t border-gray-700"
                     >
                       <textarea
@@ -251,7 +166,7 @@ function BlogPost({ post }: BlogPostProps) {
                   )}
 
                   {/* Replies Section (Only 1 Level) */}
-                  {repliesVisible && comment.replies.length > 0 && (
+                  {repliesVisible && comment.repliesCount > 0 && (
                     <div className="mt-4 space-y-4 border-l-2 border-vio/30 pl-4">
                       {comment.replies.map((reply) => (
                         <div
@@ -260,7 +175,7 @@ function BlogPost({ post }: BlogPostProps) {
                         >
                           <div className="flex items-center gap-3 mb-2">
                             <span className="font-bold text-vio">
-                              {reply.author.full_name}
+                              {reply.author.user_name}
                             </span>
                             <span className="text-sm text-gray-500 font-mono">
                               {reply.created_at}
@@ -314,7 +229,7 @@ function BlogPost({ post }: BlogPostProps) {
           </h1>
 
           <div className="flex items-center gap-6 text-sm text-gray-400 font-mono">
-            <span className="text-vio">{post.user.full_name}</span>
+            <span className="text-vio">{post.user.user_name}</span>
             <span>•</span>
             <span>{formatDate(post.created_at)}</span>
             <span>•</span>
@@ -325,7 +240,7 @@ function BlogPost({ post }: BlogPostProps) {
               <Heart size={16} /> {likeCount.toLocaleString()}
             </span>
             <span className="flex items-center gap-1">
-              <MessageCircle size={16} /> {comments.length}
+              <MessageCircle size={16} /> {post.comments_count}
             </span>
           </div>
         </div>
@@ -431,7 +346,7 @@ function BlogPost({ post }: BlogPostProps) {
 
               <div className="flex items-center gap-2 text-gray-400 font-mono">
                 <MessageCircle size={20} />
-                <span>{comments.length}</span>
+                <span>{post.comments_count}</span>
               </div>
             </div>
 
@@ -449,14 +364,14 @@ function BlogPost({ post }: BlogPostProps) {
 
         <div className="mt-16">
           <h2 className="text-3xl font-bold mb-8 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
-            Comments ({comments.length})
+            Comments ({post.comments_count})
           </h2>
 
           <div className="mb-8">
             {renderComments(comments)}
           </div>
 
-          <form onSubmit={handleCommentSubmit} className="border border-land/30 rounded-lg p-6 bg-black/30">
+          <form  className="border border-land/30 rounded-lg p-6 bg-black/30">
             <h3 className="text-xl font-bold mb-4 text-land">Add a comment</h3>
 
             <textarea
