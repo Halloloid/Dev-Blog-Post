@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Heart, Eye, MessageCircle, Github, Reply } from 'lucide-react';
+import api from '@/config/api';
 
 interface Tag {
   id: string;
@@ -21,7 +22,7 @@ interface PostComment {
   content: string;
   author: User;
   created_at: string;
-  repliesCount:number;
+  replisCount:number;
   replies: PostComment[];
 }
 
@@ -52,6 +53,8 @@ function BlogPost({ post,comments}: BlogPostProps) {
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [repliesMap, setRepliesMap] = useState<Record<string, PostComment[]>>({});
+  const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
 
   const handleLike = () => {
     if (liked) {
@@ -62,6 +65,30 @@ function BlogPost({ post,comments}: BlogPostProps) {
       setLikeCount(likeCount + 1);
     }
   };
+
+  const fetchReplies = async (commentId: string) => {
+  try {
+    setLoadingReplies((prev) => new Set(prev).add(commentId));
+
+    // const res = await fetch(`/api/replies/${commentId}`);
+    const res = await api.get(`/api/replies/${commentId}`)
+
+    const repliesArray = res.data.data ?? [];
+
+    setRepliesMap((prev) => ({
+      ...prev,
+      [commentId]: repliesArray, // assuming API returns array of replies
+    }));
+  } catch (err) {
+    console.error("Failed to fetch replies", err);
+  } finally {
+    setLoadingReplies((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(commentId);
+      return newSet;
+    });
+  }
+};
 
 
   const formatDate = (dateString: string) => {
@@ -110,22 +137,29 @@ function BlogPost({ post,comments}: BlogPostProps) {
                       Reply
                     </button>
 
-                    {comment.repliesCount > 0 && (
+                    {comment.replisCount > 0 && (
                       <button
-                        onClick={() => {
-                          const newSet = new Set(visibleReplies);
-                          if (repliesVisible) {
-                            newSet.delete(comment.id);
-                          } else {
-                            newSet.add(comment.id);
-                          }
-                          setVisibleReplies(newSet);
-                        }}
+                        onClick={async () => {
+  const newSet = new Set(visibleReplies);
+
+  if (repliesVisible) {
+    newSet.delete(comment.id);
+  } else {
+    newSet.add(comment.id);
+
+    // Fetch only if not already fetched
+    if (!repliesMap[comment.id]) {
+      await fetchReplies(comment.id);
+    }
+  }
+
+  setVisibleReplies(newSet);
+}}
                         className="text-sm text-gray-400 hover:text-land font-mono"
                       >
                         {repliesVisible
                           ? "Hide replies"
-                          : `View replies (${comment.repliesCount})`}
+                          : `View replies (${comment.replisCount})`}
                       </button>
                     )}
                   </div>
@@ -166,29 +200,48 @@ function BlogPost({ post,comments}: BlogPostProps) {
                   )}
 
                   {/* Replies Section (Only 1 Level) */}
-                  {repliesVisible && comment.repliesCount > 0 && (
-                    <div className="mt-4 space-y-4 border-l-2 border-vio/30 pl-4">
-                      {comment.replies.map((reply) => (
-                        <div
-                          key={reply.id}
-                          className="border border-gray-800 rounded-lg p-4 bg-black/20"
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="font-bold text-vio">
-                              {reply.author.user_name}
-                            </span>
-                            <span className="text-sm text-gray-500 font-mono">
-                              {reply.created_at}
-                            </span>
-                          </div>
+                  {repliesVisible && comment.replisCount > 0 && (
+  <div className="mt-4 space-y-4 border-l-2 border-vio/30 pl-4">
 
-                          <p className="text-gray-300 text-sm">
-                            {reply.content}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+    {loadingReplies.has(comment.id) && (
+      <p className="text-sm text-gray-500 font-mono">Loading replies...</p>
+    )}
+
+    {!loadingReplies.has(comment.id) &&
+  repliesMap[comment.id]?.map((reply) => (
+    <div
+      key={reply.id}
+      className="border border-gray-800 rounded-lg p-4 bg-black/20"
+    >
+      <div className="flex items-start gap-3">
+
+        {/* Avatar */}
+        <img
+          src={reply.author?.avatar_url}
+          alt={reply.author?.user_name}
+          className="w-8 h-8 rounded-full"
+        />
+
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="font-bold text-vio">
+              {reply.author.user_name}
+            </span>
+            <span className="text-sm text-gray-500 font-mono">
+              {formatDate(reply.created_at)}
+            </span>
+          </div>
+
+          <p className="text-gray-300 text-sm">
+            {reply.content}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  ))}
+  </div>
+)}
                 </div>
               </div>
             </div>
