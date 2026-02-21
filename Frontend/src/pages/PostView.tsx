@@ -10,7 +10,7 @@ interface BlogPostData {
   excerpt: string;
   featured_img: string;
   repo_link: string;
-  user: User;
+  user: Author;
   created_at: string;
   view_count: number;
   likes_count: number;
@@ -18,7 +18,16 @@ interface BlogPostData {
   tags: { id: string; slug: string; name: string }[];
 }
 
-interface User {
+interface Author{
+  id: string;
+  full_name: string;
+  user_name: string;
+  avatar_url: string;
+  bio?: string;
+  total_followers: number;
+}
+
+interface CommentUser {
   id: string;
   user_name: string;
   avatar_url:string;
@@ -27,9 +36,9 @@ interface User {
 interface PostComment {
   id: string;
   content: string;
-  author: User;
+  author: CommentUser;
   created_at: string;
-  repliesCount:number;
+  replisCount:number;
   replies: PostComment[];
 }
 

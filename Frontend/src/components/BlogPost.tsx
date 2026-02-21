@@ -11,16 +11,25 @@ interface Tag {
   name: string;
 }
 
-interface User {
+interface CommentUser {
   id: string;
   user_name: string;
   avatar_url:string;
 }
 
+interface Author {
+  id: string;
+  full_name: string;
+  user_name: string;
+  avatar_url: string;
+  bio?: string;
+  total_followers: number;
+}
+
 interface PostComment {
   id: string;
   content: string;
-  author: User;
+  author: CommentUser;
   created_at: string;
   replisCount:number;
   replies: PostComment[];
@@ -33,7 +42,7 @@ interface BlogPostData {
   excerpt: string;
   featured_img: string;
   repo_link: string;
-  user: User;
+  user:Author;
   created_at: string;
   view_count: number;
   likes_count: number;
@@ -69,8 +78,6 @@ function BlogPost({ post,comments}: BlogPostProps) {
   const fetchReplies = async (commentId: string) => {
   try {
     setLoadingReplies((prev) => new Set(prev).add(commentId));
-
-    // const res = await fetch(`/api/replies/${commentId}`);
     const res = await api.get(`/api/replies/${commentId}`)
 
     const repliesArray = res.data.data ?? [];
@@ -415,6 +422,49 @@ function BlogPost({ post,comments}: BlogPostProps) {
           </div>
         </div>
 
+        {/* ================= Author Card ================= */}
+<div className="mt-16 border border-vio/30 rounded-xl p-8 bg-black/40 backdrop-blur-sm ">
+
+  <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+
+    {/* Avatar */}
+    <div className="relative">
+      <img
+        src={post.user.avatar_url}
+        alt={post.user.user_name}
+        className="w-24 h-24 rounded-full border-2 border-land "
+      />
+      <div className="absolute inset-0 rounded-full border border-vio/40 animate-pulse" />
+    </div>
+
+    {/* Author Info */}
+    <div className="flex-1">
+      <h3 className="text-2xl font-bold text-land">
+        {post.user.full_name}
+      </h3>
+
+      <p className="text-vio font-mono text-sm">
+        @{post.user.user_name}
+      </p>
+
+      {post.user.bio && (
+        <p className="text-gray-400 mt-3 max-w-xl">
+          {post.user.bio}
+        </p>
+      )}
+
+      <div className="mt-4 text-sm text-gray-500 font-mono">
+        {post.user.total_followers} followers
+      </div>
+    </div>
+
+    {/* Follow Button */}
+    <button className="px-6 py-3 border border-land text-land rounded-lg font-mono transition-all hover:bg-land/10 hover:shadow-[0_0_20px_rgba(44,255,5,0.4)]">
+      Follow
+    </button>
+
+  </div>
+</div>
         <div className="mt-16">
           <h2 className="text-3xl font-bold mb-8 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
             Comments ({post.comments_count})
