@@ -1,133 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import FollowButton from '@/components/FollowButton';
 import { Users, Heart, FileText, Calendar } from 'lucide-react';
-
-import { Eye, MessageCircle} from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import { UserPlus, UserCheck } from 'lucide-react';
-
-export function useFollowToggle(initialFollowerCount: number) {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(initialFollowerCount);
-
-  const toggleFollow = () => {
-    setIsFollowing((prev) => {
-      const newState = !prev;
-      setFollowerCount((count) => (newState ? count + 1 : count - 1));
-      return newState;
-    });
-  };
-
-  return {
-    isFollowing,
-    followerCount,
-    toggleFollow,
-  };
-}
-
-
-interface FollowButtonProps {
-  initialFollowerCount: number;
-  onFollowerCountChange?: (count: number) => void;
-}
-
-function FollowButton({ initialFollowerCount, onFollowerCountChange }: FollowButtonProps) {
-  const { isFollowing, followerCount, toggleFollow } = useFollowToggle(initialFollowerCount);
-
-  const handleToggle = () => {
-    toggleFollow();
-    if (onFollowerCountChange) {
-      onFollowerCountChange(isFollowing ? followerCount - 1 : followerCount + 1);
-    }
-  };
-
-  return (
-    <Button
-      onClick={handleToggle}
-      className={`
-        relative overflow-hidden font-bold uppercase tracking-wider transition-all duration-300
-        ${
-          isFollowing
-            ? 'bg-transparent border-2 border-blue text-blue hover:bg-blue/10'
-            : 'bg-blue text-black border-2 border-blue hover:bg-blue/90'
-        }
-      `}
-      size="lg"
-    >
-      {isFollowing ? (
-        <>
-          <UserCheck className="mr-2 h-5 w-5" />
-          Following
-        </>
-      ) : (
-        <>
-          <UserPlus className="mr-2 h-5 w-5" />
-          Follow
-        </>
-      )}
-    </Button>
-  );
-}
-
-
-interface PostCardProps {
-  post: Post;
-  index: number;
-}
-
-function PostCard({ post, index }: PostCardProps) {
-  const postImages = [
-    '/assets/generated/post-1.dim_800x450.png',
-    '/assets/generated/post-2.dim_800x450.png',
-    '/assets/generated/post-3.dim_800x450.png',
-  ];
-
-  const imageUrl = postImages[index % postImages.length];
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  return (
-    <div className="group relative bg-black border-2 border-blue/20 hover:border-blue transition-all duration-300 overflow-hidden">
-      <div className="aspect-video overflow-hidden relative">
-        <img
-          src={imageUrl}
-          alt={post.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80" />
-      </div>
-
-      <div className="p-6 relative">
-        <div className="flex items-center gap-2 mb-3 text-blue/70 text-sm font-mono">
-          <Calendar className="h-4 w-4" />
-          <span>{formatDate(post.created_at)}</span>
-        </div>
-
-        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue transition-colors duration-300">
-          {post.title}
-        </h3>
-
-        <p className="text-gray-400 mb-4 line-clamp-2">{post.exceprt}</p>
-
-        <div className="flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2 text-blue">
-            <Eye className="h-4 w-4" />
-            <span className="font-mono">{post.view_count.toLocaleString()}</span>
-          </div>
-          <div className="flex items-center gap-2 text-blue">
-            <MessageCircle className="h-4 w-4" />
-            <span className="font-mono">{post.comments_count}</span>
-          </div>
-        </div>
-
-        <div className="absolute top-0 right-0 w-20 h-20 bg-blue/5 -mr-10 -mt-10 rotate-45" />
-      </div>
-    </div>
-  );
-}
+import userBg from "@/assets/userbg.png"
+import { useParams } from 'react-router-dom';
+import api from '@/config/api';
+import PostCard from '@/components/PostCard';
+import { type Post } from '@/components/PostCard';
 
 
 interface PostListProps {
@@ -137,24 +15,15 @@ interface PostListProps {
 function PostList({ posts }: PostListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {posts.map((post, index) => (
-        <PostCard key={post.id} post={post} index={index} />
+      {posts.map((post) => (
+        <PostCard key={post.id} post={post} />
       ))}
     </div>
   );
 }
 
 
-export interface Post {
-  id: string;
-  title: string;
-  created_at: string;
-  view_count: number;
-  comments_count: number;
-  exceprt: string;
-}
-
-export interface User {
+interface User {
   id: string;
   full_name: string;
   user_name: string;
@@ -171,45 +40,23 @@ export interface User {
 
 export default function UserProfile() {
   const [followerCount, setFollowerCount] = useState(3);
+  const [userData,setuserData] =useState<User | null>(null);
+  const {username} = useParams();
 
-  const userData: User = {
-    id: '47a16fea-cd4a-4a19-920c-49b334684f94',
-    full_name: 'John Developer',
-    user_name: 'john_dev',
-    avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john_dev',
-    bio: 'Full Stack Developer | TypeScript Enthusiast',
-    total_followers: 3,
-    total_following: 1,
-    total_likes_received: 5,
-    total_posts: 3,
-    created_at: '2026-01-31T11:29:59.085Z',
-    posts: [
-      {
-        id: '9617d0f9-e897-4428-9774-c54728552728',
-        title: 'TypeScript Generics Explained',
-        created_at: '2026-01-31T11:30:00.973Z',
-        view_count: 74,
-        comments_count: 0,
-        exceprt: 'Learn how to use TypeScript Generics to write flexible and reusable code',
-      },
-      {
-        id: '7b507f9b-fcf8-4025-a5d8-2ee0882796d0',
-        title: 'Advanced React Patterns for State Management',
-        created_at: '2026-01-31T11:30:00.971Z',
-        view_count: 339,
-        comments_count: 12,
-        exceprt: 'Explore advanced patterns and best practices for managing state in React applications',
-      },
-      {
-        id: '7a70d9ff-a9c2-44de-8c3f-17decf232486',
-        title: 'Getting Started with TypeScript in 2024',
-        created_at: '2026-01-31T11:30:00.971Z',
-        view_count: 305,
-        comments_count: 15,
-        exceprt: 'Learn the basics of TypeScript and why you should use it in your next project',
-      },
-    ],
-  };
+  useEffect(()=>{
+    const fecthdata = async() => {
+      try {
+        const res = await api.get(`/api/users/${username}`)
+        // console.log(res.data);
+        setuserData(res.data)
+      } catch (error) {
+        console.error("Errror in Profile Api:",error)
+      }
+    }
+    fecthdata();
+  },[])
+
+  if(!userData) return <div>Loading</div>
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -221,15 +68,15 @@ export default function UserProfile() {
       {/* Hero Section with Diagonal Split */}
       <div className="relative overflow-hidden">
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-15"
           style={{
-            backgroundImage: 'url(/assets/userbg.png)',
+            backgroundImage:`url(${userBg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-br from-blue/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-br from-blue/5 via-transparent to-transparent" />
 
         {/* Diagonal blue Line */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-blue/5 transform skew-x-12 translate-x-1/4" />
@@ -359,22 +206,6 @@ export default function UserProfile() {
         <div className="absolute top-0 left-20 w-16 h-16 bg-blue/8 shape-hexagon -translate-y-1/2" />
         <div className="absolute bottom-0 right-20 w-12 h-12 bg-blue/10 shape-pentagon" />
         
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <p className="text-gray-400 font-mono">
-            Built with <span className="text-blue">♥</span> using{' '}
-            <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-                window.location.hostname
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue hover:underline"
-            >
-              caffeine.ai
-            </a>
-          </p>
-          <p className="text-gray-600 text-sm mt-2">© {new Date().getFullYear()} Profile Showcase</p>
-        </div>
       </footer>
     </div>
   );
