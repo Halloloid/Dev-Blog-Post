@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Heart, Eye, MessageCircle, Github, Reply } from 'lucide-react';
 import api from '@/config/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Tag {
   id: string;
@@ -64,6 +65,11 @@ function BlogPost({ post,comments}: BlogPostProps) {
   const [replyText, setReplyText] = useState('');
   const [repliesMap, setRepliesMap] = useState<Record<string, PostComment[]>>({});
   const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
+  const navigate = useNavigate()
+
+  const onAuthorClick = async(user_name:string) => {
+    navigate(`/profile/${user_name}`)
+  }
 
   const handleLike = () => {
     if (liked) {
@@ -423,7 +429,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
         </div>
 
         {/* ================= Author Card ================= */}
-<div className="mt-16 border border-vio/30 rounded-xl p-8 bg-black/40 backdrop-blur-sm ">
+<div className="mt-16 border border-vio/30 rounded-xl p-8 bg-black/40 backdrop-blur-sm " onClick={()=> onAuthorClick(post.user.user_name)}>
 
   <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
 
@@ -438,7 +444,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
     </div>
 
     {/* Author Info */}
-    <div className="flex-1">
+    <div className="flex-1" >
       <h3 className="text-2xl font-bold text-land">
         {post.user.full_name}
       </h3>
