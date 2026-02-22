@@ -6,7 +6,8 @@
 
 @theme{
   --color-land: #2CFF05;
-  --color-vio: #FF00FF
+  --color-vio: #FF00FF;
+  --color-blue:#2323FF
 }
 
 @theme inline {
