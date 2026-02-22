@@ -36,6 +36,8 @@ export const publicUserProfile = async(req:Request,res:Response) => {
                         created_at:true,
                         view_count:true,
                         comments_count:true,
+                        likes_count:true,
+                        featured_img:true,
                         exceprt:true
                     }
                 }
