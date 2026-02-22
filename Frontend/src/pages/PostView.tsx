@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import BlogPost from '../components/BlogPost';
 import api from '@/config/api';
 import { useParams } from 'react-router-dom';
+import { AnimatedCircularProgressBar } from '@/components/ui/animated-circular-progress-bar';
 
 interface BlogPostData {
   id: string;
@@ -45,10 +46,18 @@ interface PostComment {
 function PostView() {
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(10);
   const [comment,setComment] = useState<PostComment[]>([]);
   const {id} = useParams();
 
   useEffect(() => {
+    setLoading(true);
+    setProgress(10);
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => (prev >= 90 ? 90 : prev + 10));
+    }, 250);
+
     const fecthData = async() => {
       try {
         const resposne = await api.get(`/api/posts/${id}`)
@@ -56,16 +65,28 @@ function PostView() {
         setComment(resposne.data.comments)
       } catch (error) {
         console.error("Error in Card Data:",error)
+      } finally {
+        clearInterval(progressInterval);
+        setProgress(100);
+        setLoading(false);
       }
     }
     fecthData();
-    setLoading(false);
-  }, []);
+
+    return () => clearInterval(progressInterval);
+  }, [id]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <p className="text-land font-mono">Loading...</p>
+        <div className="flex flex-col items-center gap-3">
+          <AnimatedCircularProgressBar
+            value={progress}
+            gaugePrimaryColor="var(--color-land)"
+            gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
+            className="text-white"
+          />
+        </div>
       </div>
     );
   }

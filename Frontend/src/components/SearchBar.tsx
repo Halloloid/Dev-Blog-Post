@@ -21,17 +21,18 @@ const SAMPLE_ITEMS = [
 ];
 
 interface SearchBarProps {
-  query:string;
-  setQuery:React.Dispatch<React.SetStateAction<string>>;
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (value: string) => void;
 }
 
-const SearchBar = ({query,setQuery}:SearchBarProps) => {
+const SearchBar = ({ value, onChange, onSubmit }:SearchBarProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const filtered = query.length > 0
+  const filtered = value.length > 0
     ? SAMPLE_ITEMS.filter((item) =>
-        item.toLowerCase().includes(query.toLowerCase())
+        item.toLowerCase().includes(value.toLowerCase())
       )
     : [];
 
@@ -58,9 +59,16 @@ const SearchBar = ({query,setQuery}:SearchBarProps) => {
         />
         <input
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onSubmit(value);
+              setIsFocused(false);
+            }
+          }}
           placeholder="Search..."
           className="w-full h-12 pl-12 pr-4 rounded-xl border bg-background text-base outline-none transition-all duration-200 shadow-sm"
           style={{
@@ -81,7 +89,8 @@ const SearchBar = ({query,setQuery}:SearchBarProps) => {
             <li
               key={item}
               onClick={() => {
-                setQuery(item);
+                onChange(item);
+                onSubmit(item);
                 setIsFocused(false);
               }}
               className="px-4 py-3 text-sm cursor-pointer transition-colors duration-150"
