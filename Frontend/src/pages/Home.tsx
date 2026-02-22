@@ -118,7 +118,7 @@ const Home = () => {
   return (
     <div className="relative min-h-screen bg-black text-white">
       {loading && !hasLoadedOnce && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black">
+        <div className="fixed inset-0 z-70 flex items-center justify-center bg-black">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar
               value={progress}
@@ -205,7 +205,7 @@ const Home = () => {
       </div>
 
       {loading && hasLoadedOnce && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 backdrop-blur-sm">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/35 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar
               value={progress}

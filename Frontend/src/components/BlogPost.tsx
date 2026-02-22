@@ -124,7 +124,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="font-bold text-land">
+                    <span className="font-bold text-land hover:underline" onClick={()=>onAuthorClick(comment.author.user_name)}>
                       {comment.author.user_name}
                     </span>
                     <span className="text-sm text-gray-500 font-mono">
@@ -237,7 +237,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
 
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <span className="font-bold text-vio">
+            <span className="font-bold text-vio hover:underline" onClick={()=>onAuthorClick(reply.author.user_name)}>
               {reply.author.user_name}
             </span>
             <span className="text-sm text-gray-500 font-mono">
@@ -449,7 +449,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
         {post.user.full_name}
       </h3>
 
-      <p className="text-vio font-mono text-sm">
+      <p className="text-vio font-mono text-sm hover:underline">
         @{post.user.user_name}
       </p>
 

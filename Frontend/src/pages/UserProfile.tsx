@@ -58,7 +58,6 @@ export default function UserProfile() {
     const fecthdata = async() => {
       try {
         const res = await api.get(`/api/users/${username}`)
-        // console.log(res.data);
         setuserData(res.data)
         setFollowerCount(res.data.total_followers ?? 0)
       } catch (error) {
@@ -91,7 +90,7 @@ export default function UserProfile() {
   return (
     <div className="min-h-screen bg-black text-white">
       {loading && !hasLoadedOnce && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black">
+        <div className="fixed inset-0 z-70 flex items-center justify-center bg-black">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar
               value={progress}
@@ -247,7 +246,7 @@ export default function UserProfile() {
       </footer>
 
       {loading && hasLoadedOnce && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 backdrop-blur-sm">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/35 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar
               value={progress}
