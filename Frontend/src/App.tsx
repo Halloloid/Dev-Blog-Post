@@ -3,6 +3,8 @@ import Home from "./pages/Home"
 import Landing from "./pages/Landing"
 import PostView from "./pages/PostView"
 import UserProfile from "./pages/UserProfile"
+import Followings from "./pages/Followings"
+import Followers from "./pages/Followers"
 
 const App = () => {
   return (
@@ -12,6 +14,8 @@ const App = () => {
         <Route path="/home" element={<Home/>}/>
         <Route path="/post/:id" element={<PostView/>}/>
         <Route path="/profile/:username" element={<UserProfile/>}/>
+        <Route path="/profile/:username/following" element={<Followings/>}/>
+        <Route path="/profile/:username/followers" element={<Followers/>}/>
       </Routes>
     </>
   )

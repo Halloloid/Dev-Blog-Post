@@ -1,29 +1,29 @@
-import {Eye,Heart,MessageCircle} from "lucide-react"
+import { Eye, Heart, MessageCircle } from "lucide-react"
 import { type Tag } from "@/pages/Home"
 import { useNavigate } from "react-router-dom";
 
 
-export interface CardProps{
-    id:string;
-    title:string;
-    featured_img:string;
-    view_count:number;
-    likes_count:number;
-    comments_count:number;
-    tags:Tag[];
-    exceprt?:string;
+export interface CardProps {
+  id: string;
+  title: string;
+  featured_img: string;
+  view_count: number;
+  likes_count: number;
+  comments_count: number;
+  tags: Tag[];
+  exceprt?: string;
 }
 
 
-const Card = ({id,title,featured_img,view_count,likes_count,comments_count,exceprt,tags}:CardProps) => {
+const Card = ({ id, title, featured_img, view_count, likes_count, comments_count, exceprt, tags }: CardProps) => {
   const navigate = useNavigate();
-  const naviagetToPost = async(id:string) => {
+  const naviagetToPost = async (id: string) => {
     navigate(`/post/${id}`)
   }
 
   return (
-    <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950" onClick={()=>naviagetToPost(id)}>
-      
+    <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950" onClick={() => naviagetToPost(id)}>
+
       {/* Image Section */}
       <div className="relative w-80 shrink-0 overflow-hidden">
         <img
@@ -46,14 +46,14 @@ const Card = ({id,title,featured_img,view_count,likes_count,comments_count,excep
             {exceprt || "View More"}
           </p>
           <div className="flex flex-row gap-1.5 text-sm text-gray-400 mt-10">
-  tags:
-  {tags.map((t, index) => (
-    <span key={t.id}>
-      {t.name}
-      {index !== tags.length - 1 && ", "}
-    </span>
-  ))}
-</div>
+            tags:
+            {tags.map((t, index) => (
+              <span key={t.id}>
+                {t.name}
+                {index !== tags.length - 1 && ", "}
+              </span>
+            ))}
+          </div>
 
         </div>
 

@@ -15,7 +15,7 @@ interface Tag {
 interface CommentUser {
   id: string;
   user_name: string;
-  avatar_url:string;
+  avatar_url: string;
 }
 
 interface Author {
@@ -32,7 +32,7 @@ interface PostComment {
   content: string;
   author: CommentUser;
   created_at: string;
-  replisCount:number;
+  replisCount: number;
   replies: PostComment[];
 }
 
@@ -43,7 +43,7 @@ interface BlogPostData {
   excerpt: string;
   featured_img: string;
   repo_link: string;
-  user:Author;
+  user: Author;
   created_at: string;
   view_count: number;
   likes_count: number;
@@ -56,7 +56,7 @@ interface BlogPostProps {
   comments: PostComment[];
 }
 
-function BlogPost({ post,comments}: BlogPostProps) {
+function BlogPost({ post, comments }: BlogPostProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes_count);
   const [visibleReplies, setVisibleReplies] = useState<Set<string>>(new Set());
@@ -67,7 +67,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
   const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
   const navigate = useNavigate()
 
-  const onAuthorClick = async(user_name:string) => {
+  const onAuthorClick = async (user_name: string) => {
     navigate(`/profile/${user_name}`)
   }
 
@@ -82,26 +82,26 @@ function BlogPost({ post,comments}: BlogPostProps) {
   };
 
   const fetchReplies = async (commentId: string) => {
-  try {
-    setLoadingReplies((prev) => new Set(prev).add(commentId));
-    const res = await api.get(`/api/replies/${commentId}`)
+    try {
+      setLoadingReplies((prev) => new Set(prev).add(commentId));
+      const res = await api.get(`/api/replies/${commentId}`)
 
-    const repliesArray = res.data.data ?? [];
+      const repliesArray = res.data.data ?? [];
 
-    setRepliesMap((prev) => ({
-      ...prev,
-      [commentId]: repliesArray, // assuming API returns array of replies
-    }));
-  } catch (err) {
-    console.error("Failed to fetch replies", err);
-  } finally {
-    setLoadingReplies((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(commentId);
-      return newSet;
-    });
-  }
-};
+      setRepliesMap((prev) => ({
+        ...prev,
+        [commentId]: repliesArray, // assuming API returns array of replies
+      }));
+    } catch (err) {
+      console.error("Failed to fetch replies", err);
+    } finally {
+      setLoadingReplies((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(commentId);
+        return newSet;
+      });
+    }
+  };
 
 
   const formatDate = (dateString: string) => {
@@ -110,160 +110,160 @@ function BlogPost({ post,comments}: BlogPostProps) {
   };
 
   const renderComments = (commentsList: PostComment[]) => {
-  return (
-    <div className="space-y-6">
-      {commentsList.map((comment) => {
-        const repliesVisible = visibleReplies.has(comment.id);
+    return (
+      <div className="space-y-6">
+        {commentsList.map((comment) => {
+          const repliesVisible = visibleReplies.has(comment.id);
 
-        return (
-          <div key={comment.id}>
-            <div className="border border-gray-800 rounded-lg p-6 bg-black/30">
-              <div className="flex items-start gap-4">
-                  <img src={comment.author.avatar_url} className='w-10 h-10 rounded-full flex items-center justify-center'/>
-                
+          return (
+            <div key={comment.id}>
+              <div className="border border-gray-800 rounded-lg p-6 bg-black/30">
+                <div className="flex items-start gap-4">
+                  <img src={comment.author.avatar_url} className='w-10 h-10 rounded-full flex items-center justify-center' />
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-bold text-land hover:underline" onClick={()=>onAuthorClick(comment.author.user_name)}>
-                      {comment.author.user_name}
-                    </span>
-                    <span className="text-sm text-gray-500 font-mono">
-                      {formatDate(comment.created_at)}
-                    </span>
-                  </div>
 
-                  <p className="text-gray-300 leading-relaxed mb-3">
-                    {comment.content}
-                  </p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-bold text-land hover:underline" onClick={() => onAuthorClick(comment.author.user_name)}>
+                        {comment.author.user_name}
+                      </span>
+                      <span className="text-sm text-gray-500 font-mono">
+                        {formatDate(comment.created_at)}
+                      </span>
+                    </div>
 
-                  {/* Reply Button */}
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() =>
-                        setReplyingTo(
-                          replyingTo === comment.id ? null : comment.id
-                        )
-                      }
-                      className="flex items-center gap-2 text-sm text-vio hover:text-land transition-colors font-mono"
-                    >
-                      <Reply size={16} />
-                      Reply
-                    </button>
+                    <p className="text-gray-300 leading-relaxed mb-3">
+                      {comment.content}
+                    </p>
 
-                    {comment.replisCount > 0 && (
+                    {/* Reply Button */}
+                    <div className="flex items-center gap-4">
                       <button
-                        onClick={async () => {
-  const newSet = new Set(visibleReplies);
-
-  if (repliesVisible) {
-    newSet.delete(comment.id);
-  } else {
-    newSet.add(comment.id);
-
-    // Fetch only if not already fetched
-    if (!repliesMap[comment.id]) {
-      await fetchReplies(comment.id);
-    }
-  }
-
-  setVisibleReplies(newSet);
-}}
-                        className="text-sm text-gray-400 hover:text-land font-mono"
+                        onClick={() =>
+                          setReplyingTo(
+                            replyingTo === comment.id ? null : comment.id
+                          )
+                        }
+                        className="flex items-center gap-2 text-sm text-vio hover:text-land transition-colors font-mono"
                       >
-                        {repliesVisible
-                          ? "Hide replies"
-                          : `View replies (${comment.replisCount})`}
+                        <Reply size={16} />
+                        Reply
                       </button>
+
+                      {comment.replisCount > 0 && (
+                        <button
+                          onClick={async () => {
+                            const newSet = new Set(visibleReplies);
+
+                            if (repliesVisible) {
+                              newSet.delete(comment.id);
+                            } else {
+                              newSet.add(comment.id);
+
+                              // Fetch only if not already fetched
+                              if (!repliesMap[comment.id]) {
+                                await fetchReplies(comment.id);
+                              }
+                            }
+
+                            setVisibleReplies(newSet);
+                          }}
+                          className="text-sm text-gray-400 hover:text-land font-mono"
+                        >
+                          {repliesVisible
+                            ? "Hide replies"
+                            : `View replies (${comment.replisCount})`}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Reply Form */}
+                    {replyingTo === comment.id && (
+                      <form
+                        className="mt-4 pt-4 border-t border-gray-700"
+                      >
+                        <textarea
+                          value={replyText}
+                          onChange={(e) =>
+                            setReplyText(e.target.value)
+                          }
+                          placeholder="Write a reply..."
+                          className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-land transition-all resize-none font-mono text-sm"
+                          rows={2}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            type="submit"
+                            className="px-4 py-2 bg-land text-black font-bold rounded text-sm"
+                          >
+                            Reply
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReplyingTo(null);
+                              setReplyText("");
+                            }}
+                            className="px-4 py-2 border border-gray-700 text-gray-400 rounded text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* Replies Section (Only 1 Level) */}
+                    {repliesVisible && comment.replisCount > 0 && (
+                      <div className="mt-4 space-y-4 border-l-2 border-vio/30 pl-4">
+
+                        {loadingReplies.has(comment.id) && (
+                          <p className="text-sm text-gray-500 font-mono">Loading replies...</p>
+                        )}
+
+                        {!loadingReplies.has(comment.id) &&
+                          repliesMap[comment.id]?.map((reply) => (
+                            <div
+                              key={reply.id}
+                              className="border border-gray-800 rounded-lg p-4 bg-black/20"
+                            >
+                              <div className="flex items-start gap-3">
+
+                                {/* Avatar */}
+                                <img
+                                  src={reply.author?.avatar_url}
+                                  alt={reply.author?.user_name}
+                                  className="w-8 h-8 rounded-full"
+                                />
+
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <span className="font-bold text-vio hover:underline" onClick={() => onAuthorClick(reply.author.user_name)}>
+                                      {reply.author.user_name}
+                                    </span>
+                                    <span className="text-sm text-gray-500 font-mono">
+                                      {formatDate(reply.created_at)}
+                                    </span>
+                                  </div>
+
+                                  <p className="text-gray-300 text-sm">
+                                    {reply.content}
+                                  </p>
+                                </div>
+
+                              </div>
+                            </div>
+                          ))}
+                      </div>
                     )}
                   </div>
-
-                  {/* Reply Form */}
-                  {replyingTo === comment.id && (
-                    <form
-                      className="mt-4 pt-4 border-t border-gray-700"
-                    >
-                      <textarea
-                        value={replyText}
-                        onChange={(e) =>
-                          setReplyText(e.target.value)
-                        }
-                        placeholder="Write a reply..."
-                        className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-land transition-all resize-none font-mono text-sm"
-                        rows={2}
-                      />
-                      <div className="flex gap-2 mt-2">
-                        <button
-                          type="submit"
-                          className="px-4 py-2 bg-land text-black font-bold rounded text-sm"
-                        >
-                          Reply
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setReplyingTo(null);
-                            setReplyText("");
-                          }}
-                          className="px-4 py-2 border border-gray-700 text-gray-400 rounded text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-
-                  {/* Replies Section (Only 1 Level) */}
-                  {repliesVisible && comment.replisCount > 0 && (
-  <div className="mt-4 space-y-4 border-l-2 border-vio/30 pl-4">
-
-    {loadingReplies.has(comment.id) && (
-      <p className="text-sm text-gray-500 font-mono">Loading replies...</p>
-    )}
-
-    {!loadingReplies.has(comment.id) &&
-  repliesMap[comment.id]?.map((reply) => (
-    <div
-      key={reply.id}
-      className="border border-gray-800 rounded-lg p-4 bg-black/20"
-    >
-      <div className="flex items-start gap-3">
-
-        {/* Avatar */}
-        <img
-          src={reply.author?.avatar_url}
-          alt={reply.author?.user_name}
-          className="w-8 h-8 rounded-full"
-        />
-
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="font-bold text-vio hover:underline" onClick={()=>onAuthorClick(reply.author.user_name)}>
-              {reply.author.user_name}
-            </span>
-            <span className="text-sm text-gray-500 font-mono">
-              {formatDate(reply.created_at)}
-            </span>
-          </div>
-
-          <p className="text-gray-300 text-sm">
-            {reply.content}
-          </p>
-        </div>
-
-      </div>
-    </div>
-  ))}
-  </div>
-)}
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100">
@@ -279,11 +279,10 @@ function BlogPost({ post,comments}: BlogPostProps) {
             {post.tags.map((tag, index) => (
               <span
                 key={tag.id}
-                className={`px-3 py-1 text-xs font-mono border rounded-full ${
-                  index % 2 === 0
+                className={`px-3 py-1 text-xs font-mono border rounded-full ${index % 2 === 0
                     ? 'border-land text-land shadow-[0_0_10px_rgba(44,255,5,0.3)]'
                     : 'border-vio text-vio shadow-[0_0_10px_rgba(255,0,255,0.3)]'
-                }`}
+                  }`}
               >
                 {tag.name}
               </span>
@@ -395,11 +394,10 @@ function BlogPost({ post,comments}: BlogPostProps) {
             <div className="flex items-center gap-6">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all ${
-                  liked
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all ${liked
                     ? 'border-vio text-vio bg-vio/10 shadow-[0_0_20px_rgba(255,0,255,0.3)]'
                     : 'border-gray-700 text-gray-400 hover:border-vio hover:text-vio'
-                }`}
+                  }`}
               >
                 <Heart size={20} fill={liked ? '#FF00FF' : 'none'} />
                 <span className="font-mono">{likeCount.toLocaleString()}</span>
@@ -429,48 +427,48 @@ function BlogPost({ post,comments}: BlogPostProps) {
         </div>
 
         {/* ================= Author Card ================= */}
-<div className="mt-16 border border-vio/30 rounded-xl p-8 bg-black/40 backdrop-blur-sm " onClick={()=> onAuthorClick(post.user.user_name)}>
+        <div className="mt-16 border border-vio/30 rounded-xl p-8 bg-black/40 backdrop-blur-sm " onClick={() => onAuthorClick(post.user.user_name)}>
 
-  <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
 
-    {/* Avatar */}
-    <div className="relative">
-      <img
-        src={post.user.avatar_url}
-        alt={post.user.user_name}
-        className="w-24 h-24 rounded-full border-2 border-land "
-      />
-      <div className="absolute inset-0 rounded-full border border-vio/40 animate-pulse" />
-    </div>
+            {/* Avatar */}
+            <div className="relative">
+              <img
+                src={post.user.avatar_url}
+                alt={post.user.user_name}
+                className="w-24 h-24 rounded-full border-2 border-land "
+              />
+              <div className="absolute inset-0 rounded-full border border-vio/40 animate-pulse" />
+            </div>
 
-    {/* Author Info */}
-    <div className="flex-1" >
-      <h3 className="text-2xl font-bold text-land">
-        {post.user.full_name}
-      </h3>
+            {/* Author Info */}
+            <div className="flex-1" >
+              <h3 className="text-2xl font-bold text-land">
+                {post.user.full_name}
+              </h3>
 
-      <p className="text-vio font-mono text-sm hover:underline">
-        @{post.user.user_name}
-      </p>
+              <p className="text-vio font-mono text-sm hover:underline">
+                @{post.user.user_name}
+              </p>
 
-      {post.user.bio && (
-        <p className="text-gray-400 mt-3 max-w-xl">
-          {post.user.bio}
-        </p>
-      )}
+              {post.user.bio && (
+                <p className="text-gray-400 mt-3 max-w-xl">
+                  {post.user.bio}
+                </p>
+              )}
 
-      <div className="mt-4 text-sm text-gray-500 font-mono">
-        {post.user.total_followers} followers
-      </div>
-    </div>
+              <div className="mt-4 text-sm text-gray-500 font-mono">
+                {post.user.total_followers} followers
+              </div>
+            </div>
 
-    {/* Follow Button */}
-    <button className="px-6 py-3 border border-land text-land rounded-lg font-mono transition-all hover:bg-land/10 hover:shadow-[0_0_20px_rgba(44,255,5,0.4)]">
-      Follow
-    </button>
+            {/* Follow Button */}
+            <button className="px-6 py-3 border border-land text-land rounded-lg font-mono transition-all hover:bg-land/10 hover:shadow-[0_0_20px_rgba(44,255,5,0.4)]">
+              Follow
+            </button>
 
-  </div>
-</div>
+          </div>
+        </div>
         <div className="mt-16">
           <h2 className="text-3xl font-bold mb-8 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
             Comments ({post.comments_count})
@@ -480,7 +478,7 @@ function BlogPost({ post,comments}: BlogPostProps) {
             {renderComments(comments)}
           </div>
 
-          <form  className="border border-land/30 rounded-lg p-6 bg-black/30">
+          <form className="border border-land/30 rounded-lg p-6 bg-black/30">
             <h3 className="text-xl font-bold mb-4 text-land">Add a comment</h3>
 
             <textarea

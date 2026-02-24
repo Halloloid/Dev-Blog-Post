@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import FollowButton from '@/components/FollowButton';
 import { Users, Heart, FileText, Calendar } from 'lucide-react';
 import userBg from "@/assets/userbg.png"
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '@/config/api';
 import PostCard from '@/components/PostCard';
 import { type Post } from '@/components/PostCard';
@@ -38,7 +38,6 @@ interface User {
   posts: Post[];
 }
 
-
 export default function UserProfile() {
   const [followerCount, setFollowerCount] = useState(3);
   const [userData,setuserData] =useState<User | null>(null);
@@ -46,6 +45,11 @@ export default function UserProfile() {
   const [progress, setProgress] = useState(10);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const {username} = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [username]);
 
   useEffect(()=>{
     setLoading(true);
@@ -85,6 +89,16 @@ export default function UserProfile() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const handleFollowingClick = () => {
+    if (!username) return;
+    navigate(`/profile/${username}/following`);
+  };
+
+  const handleFollowersClick = () => {
+    if (!username) return;
+    navigate(`/profile/${username}/followers`);
   };
 
   return (
@@ -170,7 +184,10 @@ export default function UserProfile() {
             <div className="grid grid-cols-2 gap-6 lg:pt-12">
               {/* Followers - Hexagon decoration */}
               <div className="stat-card">
-                <div className="bg-black border-2 border-blue/30 p-8 relative overflow-hidden group hover:border-blue transition-all duration-300">
+                <div
+                  className="bg-black border-2 border-blue/30 p-8 relative overflow-hidden group hover:border-blue transition-all duration-300 cursor-pointer"
+                  onClick={handleFollowersClick}
+                >
                   <div className="absolute top-0 right-0 w-24 h-24 bg-blue/10 shape-hexagon translate-x-8 -translate-y-8 group-hover:scale-125 transition-transform duration-500" />
                   <Users className="h-10 w-10 text-blue mb-4 relative z-10" />
                   <div className="text-5xl font-black text-white mb-2 relative z-10">{followerCount}</div>
@@ -180,7 +197,10 @@ export default function UserProfile() {
 
               {/* Following - Circle decoration */}
               <div className="stat-card">
-                <div className="bg-black border-2 border-blue/30 p-8 relative overflow-hidden group hover:border-blue transition-all duration-300">
+                <div
+                  className="bg-black border-2 border-blue/30 p-8 relative overflow-hidden group hover:border-blue transition-all duration-300 cursor-pointer"
+                  onClick={handleFollowingClick}
+                >
                   <div className="absolute top-0 right-0 w-28 h-28 bg-blue/10 shape-circle translate-x-10 -translate-y-10 group-hover:scale-125 transition-transform duration-500" />
                   <Users className="h-10 w-10 text-blue mb-4 relative z-10" />
                   <div className="text-5xl font-black text-white mb-2 relative z-10">{userData?.total_following}</div>
