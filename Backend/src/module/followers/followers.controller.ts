@@ -137,3 +137,75 @@ export const getMyFollowing = async(req:Request,res:Response) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export const getFollowing = async(req:Request,res:Response) => {
+    try {
+        const {user_name} = req.params;
+
+        if(typeof user_name !== "string") return res.status(400).json({message:"Invalid Data"});
+
+        const userExists = await prisma.user.findUnique({where:{user_name:user_name},select:{id:true}})
+
+        if(!userExists) return res.status(404).json({message:"No Such User"})
+        
+        const following = await prisma.follower.findMany({
+            where:{follower_id:userExists.id},
+            include:{
+                following:{
+                    select:{
+                        user_name:true,
+                        avatar_url:true,
+                        full_name:true,
+                    }
+                }
+            },
+            orderBy:{
+                created_at:"desc"
+            }
+        })
+
+        return res.status(200).json({
+            count: following.length,
+            following: following.map(f => f.following)
+        })
+    } catch (error) {
+        console.error("Followe Api error:",error)
+        return res.status(500).json({message:"Internal Server Error"})
+    }
+}
+
+export const getFollowers = async(req:Request,res:Response) => {
+    try {
+        const {user_name} = req.params;
+
+        if(typeof user_name !== "string") return res.status(400).json({message:"Invalid Data"});
+
+        const userExists = await prisma.user.findUnique({where:{user_name:user_name},select:{id:true}})
+
+        if(!userExists) return res.status(404).json({message:"No Such User"})
+        
+        const follower = await prisma.follower.findMany({
+            where:{following_id:userExists.id},
+            include:{
+                follower:{
+                    select:{
+                        user_name:true,
+                        avatar_url:true,
+                        full_name:true,
+                    }
+                }
+            },
+            orderBy:{
+                created_at:"desc"
+            }
+        })
+
+        return res.status(200).json({
+            count: follower.length,
+            follower: follower.map(f => f.follower)
+        })
+    } catch (error) {
+        console.error("Followe Api error:",error)
+        return res.status(500).json({message:"Internal Server Error"})
+    }
+}
