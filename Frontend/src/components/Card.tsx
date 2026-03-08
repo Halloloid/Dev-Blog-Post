@@ -22,7 +22,7 @@ const Card = ({ id, title, featured_img, view_count, likes_count, comments_count
   }
 
   return (
-    <div className="group relative flex w-full h-60 overflow-hidden rounded-xl border border-vio/30 bg-gray-950" onClick={() => naviagetToPost(id)}>
+    <div className="group relative flex w-full  overflow-hidden rounded-xl border border-vio/30 bg-gray-950" onClick={() => naviagetToPost(id)}>
 
       {/* Image Section */}
       <div className="relative w-80 shrink-0 overflow-hidden">
