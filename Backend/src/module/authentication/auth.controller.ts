@@ -109,3 +109,25 @@ export const logout = (req:Request,res:Response)=>{
     res.clearCookie("access_token");
     res.json({"message":"Logged Out"});
 };
+
+export const getMe = async(req:Request,res:Response) => {
+    try {
+        const token = req.cookies.access_token
+        if(!token) return res.status(401).json({message:"Not Logged in User"});
+
+        const decode:any = jwt.verify(token,process.env.JWT_SECRET!)
+        const user = await prisma.user.findUnique({
+            where:{id:decode.sub},
+            select:{
+                id:true,
+                full_name:true,
+                avatar_url:true,
+                user_name:true
+            }
+        })
+
+        res.json(user)
+    } catch (error) {
+        res.status(401).json({message:"Invalid Token"})        
+    }
+}
