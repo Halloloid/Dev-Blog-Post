@@ -92,8 +92,8 @@ export const googleCallback = async(req:Request,res:Response)=>{
         //Set httpOnly cookie
         res.cookie("access_token",jwtToken,{
             httpOnly:true,
-            secure:false, //Make sure to change it to true in production
-            sameSite:"lax",
+            secure:true, //Make sure to change it to true in production
+            sameSite:"none",
             maxAge:60*60*1000
         });
 
