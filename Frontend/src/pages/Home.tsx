@@ -2,7 +2,6 @@ import Card from "@/components/Card"
 import { Pagination } from "@/components/Pagination"
 import SearchBar from "@/components/SearchBar"
 import { Highlighter } from "@/components/ui/highlighter"
-import { MorphingText } from "@/components/ui/morphing-text"
 import { RainbowButton } from "@/components/ui/rainbow-button"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar"
@@ -10,6 +9,7 @@ import api from "@/config/api"
 import { useEffect, useRef, useState } from "react"
 import { type CardProps } from "@/components/Card"
 import { X } from "lucide-react"
+import { HyperText } from "@/components/ui/hyper-text"
 
 export type Tag = {
   id: string,
@@ -122,7 +122,7 @@ const Home = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-black via-slate-950 to-black text-white">
+    <div className="relative min-h-screen bg-linear-to-b from-black via-slate-950 to-black text-white">
       {loading && !hasLoadedOnce && (
         <div className="fixed inset-0 z-70 flex items-center justify-center bg-black">
           <div className="flex flex-col items-center gap-3">
@@ -132,17 +132,14 @@ const Home = () => {
               gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
               className="text-white"
             />
-          </div>
+          </div>  
         </div>
       )}
 
       {/* Navbar */}
       <nav className="w-full h-16 bg-black/50 backdrop-blur-md border-b border-fuchsia-500/30 px-8 shadow-[0_4px_20px_rgba(217,70,239,0.3)] flex items-center justify-between sticky top-0 z-50">
-        <MorphingText
-          className="text-fuchsia-400 font-bold text-2xl"
-          texts={["Dev", "Blog", "Post"]}
-        />
-        <RainbowButton size="default">Login</RainbowButton>
+        <HyperText className="text-2xl">Dev_Blog</HyperText>
+        {<RainbowButton size="default">Login</RainbowButton>}
       </nav>
 
       {/* Main Container */}
