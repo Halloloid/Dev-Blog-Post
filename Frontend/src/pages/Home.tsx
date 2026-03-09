@@ -26,12 +26,30 @@ const Home = () => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTag, setSelecetdTag] = useState("");
   const [sortBy, setSortBy] = useState<string>("created_at");
+  const [user, setUser] = useState<any>(null);
   const [posts, setposts] = useState<CardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(10);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const cardsRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const res = await api.get("/auth/me", {
+        withCredentials: true
+      });
+      console.log(res)
+
+      setUser(res.data);
+
+    } catch (error) {
+      setUser(null);
+    }
+  };
+
+  checkAuth();
+}, []);
   useEffect(() => {
     setLoading(true);
     setProgress(10);
@@ -139,7 +157,16 @@ const Home = () => {
       {/* Navbar */}
       <nav className="w-full h-16 bg-black/50 backdrop-blur-md border-b border-fuchsia-500/30 px-8 shadow-[0_4px_20px_rgba(217,70,239,0.3)] flex items-center justify-between sticky top-0 z-50">
         <HyperText className="text-2xl">Dev_Blog</HyperText>
-        {<RainbowButton size="default">Login</RainbowButton>}
+        {user ? (
+  <RainbowButton size="icon">
+    <img
+    src={user.avatar_url}
+    className="rounded-3xl"
+    />
+    </RainbowButton>
+) : (
+  <RainbowButton size="default">Login</RainbowButton>
+)}
       </nav>
 
       {/* Main Container */}

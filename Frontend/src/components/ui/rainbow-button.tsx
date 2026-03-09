@@ -26,7 +26,7 @@ const rainbowButtonVariants = cva(
         default: "h-9 px-4 py-2 rounded-xl",
         sm: "h-8 rounded-xl px-3 text-xs",
         lg: "h-11 rounded-xl px-8",
-        icon: "size-9",
+        icon: "size-11 rounded-3xl",
       },
     },
     defaultVariants: {
