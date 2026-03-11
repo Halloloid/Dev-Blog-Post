@@ -5,6 +5,7 @@ import PostView from "./pages/PostView"
 import UserProfile from "./pages/UserProfile"
 import Followings from "./pages/Followings"
 import Followers from "./pages/Followers"
+import CreatePost from "./pages/CreatePost"
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/profile/:username" element={<UserProfile/>}/>
         <Route path="/profile/:username/following" element={<Followings/>}/>
         <Route path="/profile/:username/followers" element={<Followers/>}/>
+        <Route path="/createpost" element={<CreatePost/>}/>
       </Routes>
     </>
   )

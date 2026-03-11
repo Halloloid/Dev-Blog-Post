@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react"
-import { type MouseEvent } from "react"
+import React, { MouseEvent, useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -44,41 +43,51 @@ export const RippleButton = React.forwardRef<
     }
 
     useEffect(() => {
+      let timeout: ReturnType<typeof setTimeout> | null = null
+
       if (buttonRipples.length > 0) {
         const lastRipple = buttonRipples[buttonRipples.length - 1]
-        const timeout = setTimeout(() => {
+        timeout = setTimeout(() => {
           setButtonRipples((prevRipples) =>
             prevRipples.filter((ripple) => ripple.key !== lastRipple.key)
           )
         }, parseInt(duration))
-        return () => clearTimeout(timeout)
+      }
+
+      return () => {
+        if (timeout !== null) {
+          clearTimeout(timeout)
+        }
       }
     }, [buttonRipples, duration])
 
     return (
       <button
         className={cn(
-          "bg-background text-primary relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 px-4 py-2 text-center",
+          "bg-background text-white relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 px-4 py-1 text-center border-gray-900",
           className
         )}
         onClick={handleClick}
         ref={ref}
         {...props}
       >
-        <div className="relative z-10">{children}</div>
+        <div className="relative z-10 flex items-center gap-2">{children}</div>
         <span className="pointer-events-none absolute inset-0">
           {buttonRipples.map((ripple) => (
             <span
               className="animate-rippling bg-background absolute rounded-full opacity-30"
               key={ripple.key}
-              style={{
-                width: `${ripple.size}px`,
-                height: `${ripple.size}px`,
-                top: `${ripple.y}px`,
-                left: `${ripple.x}px`,
-                backgroundColor: rippleColor,
-                transform: `scale(0)`,
-              }}
+              style={
+                {
+                  width: `${ripple.size}px`,
+                  height: `${ripple.size}px`,
+                  top: `${ripple.y}px`,
+                  left: `${ripple.x}px`,
+                  backgroundColor: rippleColor,
+                  transform: `scale(0)`,
+                  "--duration": duration,
+                } as React.CSSProperties
+              }
             />
           ))}
         </span>

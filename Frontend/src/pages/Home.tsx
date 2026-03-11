@@ -10,6 +10,9 @@ import { useEffect, useRef, useState } from "react"
 import { type CardProps } from "@/components/Card"
 import { X } from "lucide-react"
 import { HyperText } from "@/components/ui/hyper-text"
+import { RippleButton } from "@/components/ui/ripple-button"
+import { Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export type Tag = {
   id: string,
@@ -33,23 +36,24 @@ const Home = () => {
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const cardsRef = useRef<HTMLDivElement | null>(null);
 
+  const navigate = useNavigate()
   useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await api.get("/auth/me", {
-        withCredentials: true
-      });
-      console.log(res)
+    const checkAuth = async () => {
+      try {
+        const res = await api.get("/auth/me", {
+          withCredentials: true
+        });
+        console.log(res)
 
-      setUser(res.data);
+        setUser(res.data);
 
-    } catch (error) {
-      setUser(null);
-    }
-  };
+      } catch (error) {
+        setUser(null);
+      }
+    };
 
-  checkAuth();
-}, []);
+    checkAuth();
+  }, []);
   useEffect(() => {
     setLoading(true);
     setProgress(10);
@@ -150,23 +154,31 @@ const Home = () => {
               gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
               className="text-white"
             />
-          </div>  
+          </div>
         </div>
       )}
 
       {/* Navbar */}
-      <nav className="w-full h-16 bg-black/50 backdrop-blur-md border-b border-fuchsia-500/30 px-8 shadow-[0_4px_20px_rgba(217,70,239,0.3)] flex items-center justify-between sticky top-0 z-50">
+      <nav className="w-full h-18 bg-black/50 backdrop-blur-md border-b border-fuchsia-500/30 px-8 shadow-[0_4px_20px_rgba(217,70,239,0.3)] flex items-center justify-between sticky top-0 z-50">
         <HyperText className="text-2xl">Dev_Blog</HyperText>
-        {user ? (
-  <RainbowButton size="icon">
-    <img
-    src={user.avatar_url}
-    className="rounded-3xl"
-    />
-    </RainbowButton>
-) : (
-  <RainbowButton size="default">Login</RainbowButton>
-)}
+
+        <div className="flex gap-8">
+          <RippleButton onClick={()=>navigate("/createpost")}>
+            <Plus size={16} className="mt-0.5" />
+            Create Post
+          </RippleButton>
+          {user ? (
+            <RainbowButton size="icon">
+              <img
+                src={user.avatar_url}
+                className="rounded-3xl p-0.5"
+                referrerPolicy="no-referrer"
+              />
+            </RainbowButton>
+          ) : (
+            <RainbowButton size="default" onClick={() => window.location.href = "https://dev-blog-post.onrender.com/auth/google"}>Login</RainbowButton>
+          )}
+        </div>
       </nav>
 
       {/* Main Container */}
@@ -191,19 +203,19 @@ const Home = () => {
           <div>
             <p className="text-sm font-semibold text-fuchsia-300 mb-3">Sort By</p>
             <div className="flex flex-wrap gap-2">
-              <ShimmerButton 
+              <ShimmerButton
                 onClick={handleRecent}
                 className={sortBy === "created_at" ? "ring-2 ring-fuchsia-400" : ""}
               >
                 Recent
               </ShimmerButton>
-              <ShimmerButton 
+              <ShimmerButton
                 onClick={handleMostLiked}
                 className={sortBy === "likes_count" ? "ring-2 ring-fuchsia-400" : ""}
               >
                 Most Liked
               </ShimmerButton>
-              <ShimmerButton 
+              <ShimmerButton
                 onClick={handleMostViewed}
                 className={sortBy === "view_count" ? "ring-2 ring-fuchsia-400" : ""}
               >
@@ -249,7 +261,7 @@ const Home = () => {
                         ${selectedTag === tag.slug
                           ? "bg-fuchsia-500/30 border-fuchsia-400 text-white shadow-[0_0_12px_rgba(217,70,239,0.6)]"
                           : "border-fuchsia-500/40 text-fuchsia-300 bg-fuchsia-500/5 hover:bg-fuchsia-500/20 hover:border-fuchsia-400 hover:text-white hover:shadow-[0_0_12px_rgba(217,70,239,0.4)]"
-                      }`}
+                        }`}
                       onClick={() => handleSlectedTag(tag.slug)}
                     >
                       # {tag.name}
@@ -290,16 +302,16 @@ const Home = () => {
 
         {/* Pagination Section */}
         <div className="flex flex-col items-center justify-center mt-14 gap-4">
-          <Pagination 
-            currentPage={currenrPage} 
-            totalPage={totalPage} 
-            onHandleNext={handleNext} 
-            onHandlePrevious={handlePrev} 
+          <Pagination
+            currentPage={currenrPage}
+            totalPage={totalPage}
+            onHandleNext={handleNext}
+            onHandlePrevious={handlePrev}
           />
-          <p style={{ 
-            color: "rgba(255,255,255,0.4)", 
-            fontSize: "13px", 
-            fontFamily: "'DM Sans', sans-serif" 
+          <p style={{
+            color: "rgba(255,255,255,0.4)",
+            fontSize: "13px",
+            fontFamily: "'DM Sans', sans-serif"
           }} className="mt-2">
             Page <span className="font-semibold text-fuchsia-300">{currenrPage}</span> of <span className="font-semibold text-fuchsia-300">{totalPage}</span>
           </p>
