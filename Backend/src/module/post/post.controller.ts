@@ -4,6 +4,7 @@ import { redis } from "../../config/redis.js";
 import cloudinary from "../../config/cloudinary.js";
 import crypto from "crypto"
 import { trackPostView } from "./view.service.js";
+import sharp from "sharp";
 
 export const posts = async(req:Request,res:Response)=>{
     
@@ -240,23 +241,59 @@ export const createPost = async(req:Request,res:Response) => {
         if(!user?.sub) return res.status(401).json({message:"Unauthorized"});
 
         const {title,content,repo_link,exceprt,status} = req.body;
-        // console.log("file:", req.file);
 
 
         if(!title||!content||!req.file){
             return res.status(400).json({message:"Missing Required Field"})
         }
 
+        const allowedMime = new Set(["image/png", "image/jpeg", "image/jpg", "image/gif"]);
+        const allowedExt = new Set(["png", "jpg", "jpeg", "gif"]);
+        const dangerousExt = new Set(["php", "phtml", "phar", "phps", "php5", "php7", "php8"]);
 
-        if(!req.file.mimetype.startsWith('image/')) return res.status(400).json({message:"Only Image is allowed"});
+        if(!allowedMime.has(req.file.mimetype)) {
+            return res.status(400).json({message:"Only PNG, JPG or GIF images are allowed"});
+        }
+
+        const originalName = (req.file.originalname || "").toLowerCase();
+        const parts = originalName.split(".").filter(Boolean);
+        const lastExt = parts.length > 0 ? parts[parts.length - 1] : "";
+        const hasDangerous = parts.slice(0, -1).some((ext) => dangerousExt.has(ext));
+        if(!allowedExt.has(lastExt) || hasDangerous) {
+            return res.status(400).json({message:"Invalid image filename"});
+        }
+
+        const buffer = req.file.buffer;
+        const isPng = buffer.length >= 8 &&
+            buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47 &&
+            buffer[4] === 0x0D && buffer[5] === 0x0A && buffer[6] === 0x1A && buffer[7] === 0x0A;
+        const isJpeg = buffer.length >= 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+        const isGif = buffer.length >= 6 &&
+            buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38 &&
+            (buffer[4] === 0x37 || buffer[4] === 0x39) && buffer[5] === 0x61;
+
+        if(!isPng && !isJpeg && !isGif) {
+            return res.status(400).json({message:"Invalid image file"});
+        }
 
         //Check Size
         if(req.file.size>5*1024*1024) return res.status(400).json({message:"File Too Large(Max 5MB)"});
+
+        let uploadBuffer = req.file.buffer;
+        try {
+            uploadBuffer = await sharp(req.file.buffer, { animated: true })
+                .webp({ quality: 90 })
+                .toBuffer();
+        } catch (error:any) {
+            console.error("Image compression failed", error);
+            return res.status(400).json({message:"Invalid image file"});
+        }
+
         //As Cloudinary uses Streams; inMemoryStorage we need a small helper
         const streamUpload = (fileBuffer:Buffer) => {
             return new Promise<any>((resolve,reject)=>{
                 const stream = cloudinary.uploader.upload_stream(
-                    {folder:"posts"},
+                    {folder:"posts", format:"webp"},
                     (error,result) => {
                         if(result) resolve(result);
                         else reject(error)
@@ -266,7 +303,7 @@ export const createPost = async(req:Request,res:Response) => {
             })
         }
 
-        const result = await streamUpload(req.file.buffer);
+        const result = await streamUpload(uploadBuffer);
         
 
         const post = await prisma.post.create({
