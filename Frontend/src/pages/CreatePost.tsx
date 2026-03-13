@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Upload, AlertCircle, Check } from 'lucide-react';
+import { Upload, AlertCircle, Check, X } from 'lucide-react';
+import api from '@/config/api';
 
 
 interface FormErrors {
@@ -19,7 +20,7 @@ interface FormData {
   title: string;
   content: string;
   repoLink: string;
-  tags: string;
+  tags: string[];
   excerpt: string;
   status: 'draft' | 'published';
   imageUrl: string;
@@ -31,7 +32,7 @@ function CreatePost() {
     title: '',
     content: '',
     repoLink: '',
-    tags: '',
+    tags: [],
     excerpt: '',
     status: 'draft',
     imageUrl: '',
@@ -42,38 +43,44 @@ function CreatePost() {
   const [showPreview, setShowPreview] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement | null>(null);
 
-  const validateForm = (): boolean => {
+  const validateForm = (mode: 'draft' | 'published'): FormErrors => {
     const newErrors: FormErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    }
+    if (mode === 'published') {
+      if (!formData.title.trim()) {
+        newErrors.title = 'Title is required';
+      }
 
-    if (!formData.content.trim()) {
-      newErrors.content = 'Content is required';
-    }
+      if (!formData.content.trim()) {
+        newErrors.content = 'Content is required';
+      }
 
-    if (!formData.repoLink.trim()) {
-      newErrors.repoLink = 'GitHub repo link is required';
-    } else if (!formData.repoLink.startsWith('https://github.com/')) {
-      newErrors.repoLink = 'Please enter a valid GitHub URL';
-    }
+      if (!formData.repoLink.trim()) {
+        newErrors.repoLink = 'GitHub repo link is required';
+      } else if (!formData.repoLink.startsWith('https://github.com/')) {
+        newErrors.repoLink = 'Please enter a valid GitHub URL';
+      }
 
-    if (!formData.tags.trim()) {
-      newErrors.tags = 'At least one tag is required';
-    }
+      if (formData.tags.length === 0) {
+        newErrors.tags = 'At least one tag is required';
+      }
 
-    if (!formData.imageUrl && !formData.imageFile) {
-      newErrors.image = 'Featured image is required';
-    }
+      if (!formData.imageUrl && !formData.imageFile) {
+        newErrors.image = 'Featured image is required';
+      }
 
-    if (!formData.excerpt.trim()) {
-      newErrors.excerpt = 'Excerpt is required';
+      if (!formData.excerpt.trim()) {
+        newErrors.excerpt = 'Excerpt is required';
+      }
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const previewcontent = formData.content || '# Start writing your content...\n\nYour markdown preview will appear here.'
@@ -121,38 +128,89 @@ function CreatePost() {
     }
   };
 
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const res = await api.get('/api/tags');
+        const data = Array.isArray(res.data) ? res.data : [];
+        const normalized = data
+          .map((tag: any) => {
+            if (typeof tag === 'string') return tag;
+            if (tag?.name) return tag.name;
+            if (tag?.slug) return tag.slug;
+            return '';
+          })
+          .filter((tag: string) => tag.trim().length > 0);
+        setAvailableTags(Array.from(new Set(normalized)));
+      } catch (error) {
+        console.error('Failed to load tags', error);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
   const handlePublish = () => {
-    if (validateForm()) {
+    const newErrors = validateForm(formData.status);
+    if (formData.status === 'draft' || Object.keys(newErrors).length === 0) {
       setSuccessMessage('Post created successfully!');
       setTimeout(() => {
         setSuccessMessage('');
       }, 2000);
     } else {
-      const firstError = Object.keys(errors)[0];
+      const firstError = Object.keys(newErrors)[0];
       if (firstError === 'content') {
         document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' });
+      }
+      if (firstError === 'tags') {
+        tagInputRef.current?.focus();
       }
     }
   };
 
-  const parseTags = (tagString: string): string[] => {
-    return tagString
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+  const normalizedInput = tagInput.trim();
+
+  const suggestions = useMemo(() => {
+    if (!normalizedInput) return [];
+    const lower = normalizedInput.toLowerCase();
+    return availableTags
+      .filter(tag => !formData.tags.includes(tag))
+      .filter(tag => tag.toLowerCase().includes(lower))
+      .slice(0, 8);
+  }, [availableTags, formData.tags, normalizedInput]);
+
+  const addTag = (tag: string) => {
+    const cleaned = tag.trim();
+    if (!cleaned) return;
+    if (formData.tags.includes(cleaned)) return;
+    if (formData.tags.length >= 5) return;
+
+    setFormData(prev => ({ ...prev, tags: [...prev.tags, cleaned] }));
+    setTagInput('');
+    setShowSuggestions(false);
+    if (errors.tags) {
+      setErrors(prev => ({ ...prev, tags: undefined }));
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
   };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100">
       <div className="sticky top-0 z-50 bg-[#0a0a0a] border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-[#2CFF05]">Create New Post</h1>
+          <h1 className="text-2xl font-bold text-land">Create New Post</h1>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowPreview(!showPreview)}
               className={`px-4 py-2 rounded-lg font-mono transition-all ${showPreview
-                  ? 'bg-[#2CFF05] text-black'
-                  : 'border border-[#2CFF05] text-[#2CFF05] hover:bg-[#2CFF05]/10'
+                ? 'bg-land text-black'
+                : 'border border-land text-land hover:bg-land/10'
                 }`}
             >
               {showPreview ? 'Edit' : 'Preview'}
@@ -167,7 +225,7 @@ function CreatePost() {
       </div>
 
       {successMessage && (
-        <div className="bg-[#2CFF05]/10 border border-[#2CFF05] text-[#2CFF05] p-4 m-6 rounded-lg flex items-center gap-3 font-mono">
+        <div className="bg-land/10 border border-land text-land p-4 m-6 rounded-lg flex items-center gap-3 font-mono">
           <Check size={20} />
           {successMessage}
         </div>
@@ -178,7 +236,7 @@ function CreatePost() {
           {!showPreview && (
             <div className="lg:col-span-2 space-y-8">
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
+                <label className="block text-sm font-bold text-land font-mono">
                   Title *
                 </label>
                 <input
@@ -188,8 +246,8 @@ function CreatePost() {
                   onChange={handleInputChange}
                   placeholder="Enter post title..."
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.title
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-[#2CFF05] focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
+                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
                     }`}
                 />
                 {errors.title && (
@@ -201,7 +259,7 @@ function CreatePost() {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
+                <label className="block text-sm font-bold text-land font-mono">
                   Excerpt *
                 </label>
                 <textarea
@@ -211,8 +269,8 @@ function CreatePost() {
                   placeholder="Brief summary of your post..."
                   rows={2}
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono resize-none ${errors.excerpt
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-[#2CFF05] focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
+                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
                     }`}
                 />
                 {errors.excerpt && (
@@ -224,7 +282,7 @@ function CreatePost() {
               </div>
 
               <div id="content-section" className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
+                <label className="block text-sm font-bold text-land font-mono">
                   Content (Markdown) *
                 </label>
                 <textarea
@@ -234,8 +292,8 @@ function CreatePost() {
                   placeholder="Write your content in markdown... (supports code blocks with ```typescript)"
                   rows={15}
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono resize-none ${errors.content
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-[#2CFF05] focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
+                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
                     }`}
                 />
                 {errors.content && (
@@ -247,40 +305,81 @@ function CreatePost() {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
-                  Tags (comma-separated) *
+                <label className="block text-sm font-bold text-land font-mono">
+                  Tags (max 5) *
                 </label>
-                <input
-                  type="text"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="TypeScript, Node.js, API, Tutorial"
-                  className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.tags
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    ref={tagInputRef}
+                    onChange={(e) => {
+                      setTagInput(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag(tagInput);
+                      }
+                      if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) {
+                        removeTag(formData.tags[formData.tags.length - 1]);
+                      }
+                    }}
+                    placeholder="Start typing a tag and press Enter"
+                    disabled={formData.tags.length >= 5}
+                    className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.tags
                       ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-[#2CFF05] focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
-                    }`}
-                />
+                      : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                      }`}
+                  />
+                  {showSuggestions && suggestions.length > 0 && formData.tags.length < 5 && (
+                    <div className="absolute z-10 mt-2 w-full rounded-lg border border-gray-700 bg-[#0d0d0d] shadow-[0_0_20px_rgba(0,0,0,0.4)]">
+                      {suggestions.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => addTag(tag)}
+                          className="w-full text-left px-4 py-2 text-sm font-mono text-gray-300 hover:bg-land/10 hover:text-land transition-colors"
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {errors.tags && (
                   <div className="flex items-center gap-2 text-red-500 text-sm font-mono">
                     <AlertCircle size={16} />
                     {errors.tags}
                   </div>
                 )}
+                <div className="text-xs text-gray-500 font-mono">
+                  {formData.tags.length}/5 tags selected
+                </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {parseTags(formData.tags).map((tag) => (
+                  {formData.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 text-xs font-mono border border-[#2CFF05] text-[#2CFF05] rounded-full shadow-[0_0_10px_rgba(44,255,5,0.2)]"
+                      className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono border border-land text-land rounded-full shadow-[0_0_10px_rgba(44,255,5,0.2)]"
                     >
                       {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="text-land/80 hover:text-land"
+                        aria-label={`Remove ${tag}`}
+                      >
+                        <X size={12} />
+                      </button>
                     </span>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
+                <label className="block text-sm font-bold text-land font-mono">
                   GitHub Repo Link *
                 </label>
                 <input
@@ -290,8 +389,8 @@ function CreatePost() {
                   onChange={handleInputChange}
                   placeholder="https://github.com/username/repo-name"
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.repoLink
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-[#2CFF05] focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
+                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
                     }`}
                 />
                 {errors.repoLink && (
@@ -303,7 +402,7 @@ function CreatePost() {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
+                <label className="block text-sm font-bold text-land font-mono">
                   Featured Image *
                 </label>
                 <div className="relative">
@@ -317,13 +416,13 @@ function CreatePost() {
                   <label
                     htmlFor="image-upload"
                     className={`flex items-center justify-center gap-3 p-8 border-2 border-dashed rounded-lg cursor-pointer transition-all ${errors.image
-                        ? 'border-red-500 bg-red-500/5'
-                        : 'border-[#2CFF05] hover:bg-[#2CFF05]/5'
+                      ? 'border-red-500 bg-red-500/5'
+                      : 'border-land hover:bg-land/5'
                       }`}
                   >
-                    <Upload size={24} className={errors.image ? 'text-red-500' : 'text-[#2CFF05]'} />
+                    <Upload size={24} className={errors.image ? 'text-red-500' : 'text-land'} />
                     <div className="text-center">
-                      <p className={`font-mono font-bold ${errors.image ? 'text-red-500' : 'text-[#2CFF05]'}`}>
+                      <p className={`font-mono font-bold ${errors.image ? 'text-red-500' : 'text-land'}`}>
                         Click to upload image
                       </p>
                       <p className="text-xs text-gray-500 font-mono">PNG, JPG, GIF up to 5MB</p>
@@ -357,25 +456,45 @@ function CreatePost() {
                 )}
               </div>
 
+
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#2CFF05] font-mono">
+                <label className="block text-sm font-bold text-land font-mono">
                   Status *
                 </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-4 text-gray-300 focus:outline-none focus:border-[#2CFF05] transition-all font-mono"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                </select>
+
+                <div className="flex items-center gap-6  p-4">
+
+                  <label className="flex items-center gap-2 text-gray-300 font-mono cursor-pointer">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="draft"
+                      checked={formData.status === "draft"}
+                      onChange={handleInputChange}
+                      className="accent-land w-4 h-4"
+                    />
+                    Draft
+                  </label>
+
+                  <label className="flex items-center gap-2 text-gray-300 font-mono cursor-pointer">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="published"
+                      checked={formData.status === "published"}
+                      onChange={handleInputChange}
+                      className="accent-land w-4 h-4"
+                    />
+                    Published
+                  </label>
+
+                </div>
               </div>
 
               <div className="flex gap-3">
                 <button
                   onClick={handlePublish}
-                  className="flex-1 px-8 py-3 bg-[#2CFF05] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono"
+                  className="flex-1 px-8 py-3 bg-land text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono"
                 >
                   {formData.status === 'published' ? 'Publish Post' : 'Save Draft'}
                 </button>
@@ -403,7 +522,7 @@ function CreatePost() {
                     </div>
                   )}
 
-                  <h1 className="text-5xl font-bold mb-6 text-[#2CFF05] drop-shadow-[0_0_20px_rgba(44,255,5,0.5)]">
+                  <h1 className="text-5xl font-bold mb-6 text-land drop-shadow-[0_0_20px_rgba(44,255,5,0.5)]">
                     {formData.title || 'Your Post Title'}
                   </h1>
 
@@ -413,7 +532,7 @@ function CreatePost() {
                     <span>{new Date().toLocaleDateString()}</span>
                   </div>
 
-            
+
                   <article className="prose prose-invert prose-lg max-w-none">
                     <ReactMarkdown
                       components={{
@@ -495,14 +614,14 @@ function CreatePost() {
                 <div className="border-l border-gray-800 pl-8">
                   <div className="sticky top-24 space-y-6">
                     <div>
-                      <h3 className="text-sm font-bold text-[#2CFF05] mb-3 font-mono">TAGS</h3>
+                      <h3 className="text-sm font-bold text-land mb-3 font-mono">TAGS</h3>
                       <div className="flex flex-wrap gap-2">
-                        {parseTags(formData.tags).map((tag, index) => (
+                        {formData.tags.map((tag, index) => (
                           <span
                             key={tag}
                             className={`px-3 py-1 text-xs font-mono border rounded-full ${index % 2 === 0
-                                ? 'border-[#2CFF05] text-[#2CFF05] shadow-[0_0_10px_rgba(44,255,5,0.3)]'
-                                : 'border-white text-white'
+                              ? 'border-land text-land shadow-[0_0_10px_rgba(44,255,5,0.3)]'
+                              : 'border-white text-white'
                               }`}
                           >
                             {tag}
@@ -512,17 +631,17 @@ function CreatePost() {
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-bold text-[#2CFF05] mb-3 font-mono">EXCERPT</h3>
+                      <h3 className="text-sm font-bold text-land mb-3 font-mono">EXCERPT</h3>
                       <p className="text-sm text-gray-300 leading-relaxed">
                         {formData.excerpt || 'Your excerpt will appear here...'}
                       </p>
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-bold text-[#2CFF05] mb-3 font-mono">STATUS</h3>
+                      <h3 className="text-sm font-bold text-land mb-3 font-mono">STATUS</h3>
                       <span className={`px-3 py-1 text-xs font-mono border rounded ${formData.status === 'published'
-                          ? 'border-[#2CFF05] text-[#2CFF05] bg-[#2CFF05]/10'
-                          : 'border-gray-700 text-gray-400'
+                        ? 'border-land text-land bg-land/10'
+                        : 'border-gray-700 text-gray-400'
                         }`}>
                         {formData.status === 'published' ? 'Published' : 'Draft'}
                       </span>
