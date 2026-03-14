@@ -40,12 +40,12 @@ model User {
 
 model Post {
   id           String  @id @default(uuid()) @db.Uuid
-  title        String
+  title        String?
   created_by   String  @db.Uuid
   user         User    @relation(fields: [created_by], references: [id])
-  content      String
+  content      String?
   repo_link    String?
-  featured_img String
+  featured_img String?
   exceprt      String? //Summary
   status       Status  @default(draft)
 
