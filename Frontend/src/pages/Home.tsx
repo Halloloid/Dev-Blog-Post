@@ -107,6 +107,10 @@ const Home = () => {
     }
   };
 
+  const onAuthorClick = async (user_name: string) => {
+    navigate(`/profile/${user_name}`)
+  }
+
   const handleMostLiked = () => {
     setcurrentPage(1);
     setSortBy("likes_count");
@@ -168,7 +172,7 @@ const Home = () => {
             Create Post
           </RippleButton>
           {user ? (
-            <RainbowButton size="icon">
+            <RainbowButton size="icon" onClick={()=>onAuthorClick(user.user_name)}>
               <img
                 src={user.avatar_url}
                 className="rounded-3xl p-0.5"

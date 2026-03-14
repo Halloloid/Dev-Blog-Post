@@ -4,6 +4,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Upload, AlertCircle, Check, X } from 'lucide-react';
 import api from '@/config/api';
+import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
+import { useNavigate } from "react-router-dom";
 
 
 interface FormErrors {
@@ -16,11 +18,17 @@ interface FormErrors {
   status?: string;
 }
 
+interface TagOption {
+  id: string;
+  name: string;
+  slug?: string;
+}
+
 interface FormData {
   title: string;
   content: string;
   repoLink: string;
-  tags: string[];
+  tags: TagOption[];
   excerpt: string;
   status: 'draft' | 'published';
   imageUrl: string;
@@ -43,10 +51,14 @@ function CreatePost() {
   const [showPreview, setShowPreview] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [apiError, setApiError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progress, setProgress] = useState(10);
+  const [availableTags, setAvailableTags] = useState<TagOption[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const tagInputRef = useRef<HTMLInputElement | null>(null);
+  const navigate = useNavigate();
 
   const validateForm = (mode: 'draft' | 'published'): FormErrors => {
     const newErrors: FormErrors = {};
@@ -84,7 +96,6 @@ function CreatePost() {
   };
 
   const previewcontent = formData.content || '# Start writing your content...\n\nYour markdown preview will appear here.'
-  console.log(previewcontent)
   const parsedcontent = previewcontent.replace(/\\n/g, "\n");
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -135,13 +146,18 @@ function CreatePost() {
         const data = Array.isArray(res.data) ? res.data : [];
         const normalized = data
           .map((tag: any) => {
-            if (typeof tag === 'string') return tag;
-            if (tag?.name) return tag.name;
-            if (tag?.slug) return tag.slug;
-            return '';
+            if (typeof tag === 'string') {
+              const trimmed = tag.trim();
+              if (!trimmed) return null;
+              return { id: trimmed, name: trimmed, slug: trimmed } as TagOption;
+            }
+            if (tag?.id && tag?.name) {
+              return { id: tag.id, name: tag.name, slug: tag.slug } as TagOption;
+            }
+            return null;
           })
-          .filter((tag: string) => tag.trim().length > 0);
-        setAvailableTags(Array.from(new Set(normalized)));
+          .filter((tag: TagOption | null): tag is TagOption => Boolean(tag));
+        setAvailableTags(normalized);
       } catch (error) {
         console.error('Failed to load tags', error);
       }
@@ -150,13 +166,49 @@ function CreatePost() {
     fetchTags();
   }, []);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const newErrors = validateForm(formData.status);
     if (formData.status === 'draft' || Object.keys(newErrors).length === 0) {
-      setSuccessMessage('Post created successfully!');
-      setTimeout(() => {
-        setSuccessMessage('');
-      }, 2000);
+      setIsSubmitting(true);
+      setProgress(10);
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => (prev >= 90 ? 90 : prev + 10));
+      }, 250);
+
+      const payload = new FormData();
+      payload.append("title", formData.title);
+      payload.append("content", formData.content);
+      payload.append("repo_link", formData.repoLink);
+      payload.append("exceprt", formData.excerpt);
+      payload.append("status", formData.status);
+
+      formData.tags.forEach((tag) => {
+        payload.append("tags[]", tag.id);
+      });
+
+      if (formData.imageFile) {
+        payload.append("featured_img", formData.imageFile);
+      }
+
+      try {
+        await api.post("/api/posts/", payload, {
+          withCredentials: true
+        });
+        setApiError('');
+        setSuccessMessage('Post created successfully!');
+        setProgress(100);
+        setTimeout(() => {
+          setSuccessMessage('');
+          navigate("/home");
+        }, 2000);
+      } catch (error: any) {
+        const message = error?.response?.data?.message || "Failed to create post";
+        setApiError(message);
+        console.error("Failed to create post", error);
+      } finally {
+        clearInterval(progressInterval);
+        setIsSubmitting(false);
+      }
     } else {
       const firstError = Object.keys(newErrors)[0];
       if (firstError === 'content') {
@@ -169,23 +221,29 @@ function CreatePost() {
   };
 
   const normalizedInput = tagInput.trim();
+  const findTagByInput = (input: string) => {
+    const lower = input.trim().toLowerCase();
+    if (!lower) return null;
+    return availableTags.find(
+      tag => tag.name.toLowerCase() === lower || tag.slug?.toLowerCase() === lower
+    ) || null;
+  };
 
   const suggestions = useMemo(() => {
     if (!normalizedInput) return [];
     const lower = normalizedInput.toLowerCase();
     return availableTags
-      .filter(tag => !formData.tags.includes(tag))
-      .filter(tag => tag.toLowerCase().includes(lower))
+      .filter(tag => !formData.tags.some(selected => selected.id === tag.id))
+      .filter(tag => tag.name.toLowerCase().includes(lower) || tag.slug?.toLowerCase().includes(lower))
       .slice(0, 8);
   }, [availableTags, formData.tags, normalizedInput]);
 
-  const addTag = (tag: string) => {
-    const cleaned = tag.trim();
-    if (!cleaned) return;
-    if (formData.tags.includes(cleaned)) return;
+  const addTag = (tag: TagOption) => {
+    if (!tag?.id) return;
+    if (formData.tags.some(selected => selected.id === tag.id)) return;
     if (formData.tags.length >= 5) return;
 
-    setFormData(prev => ({ ...prev, tags: [...prev.tags, cleaned] }));
+    setFormData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
     setTagInput('');
     setShowSuggestions(false);
     if (errors.tags) {
@@ -193,10 +251,10 @@ function CreatePost() {
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
+  const removeTag = (tagToRemove: TagOption) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter(tag => tag.id !== tagToRemove.id)
     }));
   };
 
@@ -228,6 +286,12 @@ function CreatePost() {
         <div className="bg-land/10 border border-land text-land p-4 m-6 rounded-lg flex items-center gap-3 font-mono">
           <Check size={20} />
           {successMessage}
+        </div>
+      )}
+      {apiError && (
+        <div className="bg-red-500/10 border border-red-500 text-red-400 p-4 m-6 rounded-lg flex items-center gap-3 font-mono">
+          <AlertCircle size={20} />
+          {apiError}
         </div>
       )}
 
@@ -321,7 +385,12 @@ function CreatePost() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        addTag(tagInput);
+                        const match = findTagByInput(tagInput);
+                        if (match) {
+                          addTag(match);
+                        } else {
+                          setErrors(prev => ({ ...prev, tags: 'Please select a tag from suggestions' }));
+                        }
                       }
                       if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) {
                         removeTag(formData.tags[formData.tags.length - 1]);
@@ -338,12 +407,12 @@ function CreatePost() {
                     <div className="absolute z-10 mt-2 w-full rounded-lg border border-gray-700 bg-[#0d0d0d] shadow-[0_0_20px_rgba(0,0,0,0.4)]">
                       {suggestions.map((tag) => (
                         <button
-                          key={tag}
+                          key={tag.id}
                           type="button"
                           onClick={() => addTag(tag)}
                           className="w-full text-left px-4 py-2 text-sm font-mono text-gray-300 hover:bg-land/10 hover:text-land transition-colors"
                         >
-                          {tag}
+                          {tag.name}
                         </button>
                       ))}
                     </div>
@@ -361,15 +430,15 @@ function CreatePost() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.tags.map((tag) => (
                     <span
-                      key={tag}
+                      key={tag.id}
                       className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono border border-land text-land rounded-full shadow-[0_0_10px_rgba(44,255,5,0.2)]"
                     >
-                      {tag}
+                      {tag.name}
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
                         className="text-land/80 hover:text-land"
-                        aria-label={`Remove ${tag}`}
+                        aria-label={`Remove ${tag.name}`}
                       >
                         <X size={12} />
                       </button>
@@ -618,13 +687,13 @@ function CreatePost() {
                       <div className="flex flex-wrap gap-2">
                         {formData.tags.map((tag, index) => (
                           <span
-                            key={tag}
+                            key={tag.id}
                             className={`px-3 py-1 text-xs font-mono border rounded-full ${index % 2 === 0
                               ? 'border-land text-land shadow-[0_0_10px_rgba(44,255,5,0.3)]'
                               : 'border-white text-white'
                               }`}
                           >
-                            {tag}
+                            {tag.name}
                           </span>
                         ))}
                       </div>
@@ -653,6 +722,19 @@ function CreatePost() {
           )}
         </div>
       </div>
+
+      {isSubmitting && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/35 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <AnimatedCircularProgressBar
+              value={progress}
+              gaugePrimaryColor="var(--color-land)"
+              gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
+              className="text-white"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
