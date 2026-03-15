@@ -7,6 +7,7 @@ import api from '@/config/api';
 import PostCard from '@/components/PostCard';
 import { type Post } from '@/components/PostCard';
 import { AnimatedCircularProgressBar } from '@/components/ui/animated-circular-progress-bar';
+import { useToast } from '@/components/ui/toast';
 
 
 interface PostListProps {
@@ -44,8 +45,11 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(10);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ id: string; user_name: string } | null>(null);
   const {username} = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -54,6 +58,7 @@ export default function UserProfile() {
   useEffect(()=>{
     setLoading(true);
     setProgress(10);
+    setIsFollowing(false);
 
     const progressInterval = setInterval(() => {
       setProgress((prev) => (prev >= 90 ? 90 : prev + 10));
@@ -61,9 +66,23 @@ export default function UserProfile() {
 
     const fecthdata = async() => {
       try {
-        const res = await api.get(`/api/users/${username}`)
-        setuserData(res.data)
-        setFollowerCount(res.data.total_followers ?? 0)
+        const [res, meRes] = await Promise.all([
+          api.get(`/api/users/${username}`),
+          api.get("/auth/me", { withCredentials: true }).catch(() => null),
+        ]);
+        setuserData(res.data);
+        setFollowerCount(res.data.total_followers ?? 0);
+        setCurrentUser(meRes?.data ?? null);
+
+        try {
+          const followingRes = await api.get("/api/follow/following");
+          const isUserFollowing = followingRes.data?.following?.some(
+            (user: { id?: string }) => user.id === res.data.id
+          );
+          setIsFollowing(Boolean(isUserFollowing));
+        } catch (followError) {
+          console.error("Error in Following Api:", followError);
+        }
       } catch (error) {
         console.error("Errror in Profile Api:",error)
       } finally {
@@ -99,6 +118,33 @@ export default function UserProfile() {
   const handleFollowersClick = () => {
     if (!username) return;
     navigate(`/profile/${username}/followers`);
+  };
+
+  const isOwnProfile =
+    Boolean(currentUser?.id && userData?.id && currentUser.id === userData.id) ||
+    Boolean(currentUser?.user_name && username && currentUser.user_name === username);
+
+  const handleFollowClick = async () => {
+    if (!userData?.id) return;
+    const prevIsFollowing = isFollowing;
+    const prevFollowerCount = followerCount;
+    const optimisticIsFollowing = !prevIsFollowing;
+    setIsFollowing(optimisticIsFollowing);
+    try {
+      const res = await api.post(`/api/follow/${userData.id}`);
+      if (typeof res.data?.followed === "boolean") {
+        setIsFollowing(res.data.followed);
+      }
+    } catch (error) {
+      setIsFollowing(prevIsFollowing);
+      setFollowerCount(prevFollowerCount);
+      toast({
+        title: "Follow failed",
+        description: "Please try again.",
+        variant: "error",
+      });
+      console.error("Error in Follow Api:", error);
+    }
   };
 
   return (
@@ -170,7 +216,14 @@ export default function UserProfile() {
 
               {/* Follow Button */}
               <div className="pt-4">
-                <FollowButton initialFollowerCount={userData?.total_followers ?? 0} onFollowerCountChange={setFollowerCount} />
+                {!isOwnProfile && (
+                  <FollowButton
+                    initialFollowerCount={userData?.total_followers ?? 0}
+                    onFollowerCountChange={setFollowerCount}
+                    onFollowClick={handleFollowClick}
+                    initialIsFollowing={isFollowing}
+                  />
+                )}
               </div>
 
               {/* Member Since */}
