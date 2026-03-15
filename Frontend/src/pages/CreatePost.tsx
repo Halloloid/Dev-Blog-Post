@@ -5,7 +5,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Upload, AlertCircle, Check, X } from 'lucide-react';
 import api from '@/config/api';
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 interface FormErrors {
@@ -59,6 +59,7 @@ function CreatePost() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const tagInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const { username } = useParams<{ username: string }>();
 
   const validateForm = (mode: 'draft' | 'published'): FormErrors => {
     const newErrors: FormErrors = {};
@@ -274,7 +275,7 @@ function CreatePost() {
               {showPreview ? 'Edit' : 'Preview'}
             </button>
             <button
-              className="px-4 py-2 border border-gray-700 text-gray-400 rounded-lg hover:border-white hover:text-white transition-all font-mono"
+              className="px-4 py-2 border border-gray-700 text-gray-400 rounded-lg hover:border-white hover:text-white transition-all font-mono" onClick={() => navigate("/home")}
             >
               Back
             </button>
@@ -596,7 +597,7 @@ function CreatePost() {
                   </h1>
 
                   <div className="flex items-center gap-6 text-sm text-gray-400 font-mono mb-8">
-                    <span>John Developer</span>
+                    <span>{username}</span>
                     <span>•</span>
                     <span>{new Date().toLocaleDateString()}</span>
                   </div>

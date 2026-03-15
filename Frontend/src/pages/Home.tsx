@@ -43,8 +43,6 @@ const Home = () => {
         const res = await api.get("/auth/me", {
           withCredentials: true
         });
-        console.log(res)
-
         setUser(res.data);
 
       } catch (error) {
@@ -167,12 +165,12 @@ const Home = () => {
         <HyperText className="text-2xl">Dev_Blog</HyperText>
 
         <div className="flex gap-8">
-          <RippleButton onClick={()=>navigate("/createpost")}>
+          <RippleButton onClick={() => navigate(`/createpost/${user.user_name}`)}>
             <Plus size={16} className="mt-0.5" />
             Create Post
           </RippleButton>
           {user ? (
-            <RainbowButton size="icon" onClick={()=>onAuthorClick(user.user_name)}>
+            <RainbowButton size="icon" onClick={() => onAuthorClick(user.user_name)}>
               <img
                 src={user.avatar_url}
                 className="rounded-3xl p-0.5"

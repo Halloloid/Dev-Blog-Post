@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search } from "lucide-react";
 import { ShineBorder } from "./ui/shine-border";
 

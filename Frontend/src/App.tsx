@@ -17,7 +17,7 @@ const App = () => {
         <Route path="/profile/:username" element={<UserProfile/>}/>
         <Route path="/profile/:username/following" element={<Followings/>}/>
         <Route path="/profile/:username/followers" element={<Followers/>}/>
-        <Route path="/createpost" element={<CreatePost/>}/>
+        <Route path="/createpost/:username" element={<CreatePost/>}/>
       </Routes>
     </>
   )
