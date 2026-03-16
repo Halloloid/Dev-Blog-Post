@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BlogPost from '../components/BlogPost';
 import api from '@/config/api';
 import { useParams } from 'react-router-dom';
@@ -50,6 +50,13 @@ function PostView() {
   const [comment,setComment] = useState<PostComment[]>([]);
   const {id} = useParams();
 
+  const fetchPost = useCallback(async () => {
+    if (!id) return;
+    const resposne = await api.get(`/api/posts/${id}`);
+    setPost(resposne.data);
+    setComment(resposne.data.comments);
+  }, [id]);
+
   useEffect(() => {
     setLoading(true);
     setProgress(10);
@@ -60,9 +67,7 @@ function PostView() {
 
     const fecthData = async() => {
       try {
-        const resposne = await api.get(`/api/posts/${id}`)
-        setPost(resposne.data)
-        setComment(resposne.data.comments)
+        await fetchPost();
       } catch (error) {
         console.error("Error in Card Data:",error)
       } finally {
@@ -74,7 +79,7 @@ function PostView() {
     fecthData();
 
     return () => clearInterval(progressInterval);
-  }, [id]);
+  }, [fetchPost, id]);
 
   if (loading) {
     return (
@@ -91,7 +96,13 @@ function PostView() {
     );
   }
 
-  return post ? <BlogPost post={post} comments={comment}/> : null;
+  return post ? (
+    <BlogPost
+      post={post}
+      comments={comment}
+      onCommentPosted={fetchPost}
+    />
+  ) : null;
 }
 
 export default PostView;

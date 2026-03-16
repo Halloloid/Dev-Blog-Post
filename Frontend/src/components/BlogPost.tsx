@@ -54,9 +54,10 @@ interface BlogPostData {
 interface BlogPostProps {
   post: BlogPostData;
   comments: PostComment[];
+  onCommentPosted: () => Promise<void> | void;
 }
 
-function BlogPost({ post, comments }: BlogPostProps) {
+function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes_count);
   const [visibleReplies, setVisibleReplies] = useState<Set<string>>(new Set());
@@ -65,6 +66,7 @@ function BlogPost({ post, comments }: BlogPostProps) {
   const [replyText, setReplyText] = useState('');
   const [repliesMap, setRepliesMap] = useState<Record<string, PostComment[]>>({});
   const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
+  const [isPostingComment, setIsPostingComment] = useState(false);
   const navigate = useNavigate()
 
   const onAuthorClick = async (user_name: string) => {
@@ -103,6 +105,21 @@ function BlogPost({ post, comments }: BlogPostProps) {
     }
   };
 
+  const postComment = async (postId: string) => {
+    if (!comment.trim() || isPostingComment) return;
+    try {
+      setIsPostingComment(true);
+      await api.post(`/api/comments/${postId}/post`, {
+        content: comment,
+      })
+      setComment('');
+      await onCommentPosted();
+    } catch (error) {
+      console.error("Fail to Make a Comment",error)
+    } finally {
+      setIsPostingComment(false);
+    }
+  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -181,6 +198,9 @@ function BlogPost({ post, comments }: BlogPostProps) {
                     {replyingTo === comment.id && (
                       <form
                         className="mt-4 pt-4 border-t border-gray-700"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                        }}
                       >
                         <textarea
                           value={replyText}
@@ -462,11 +482,6 @@ function BlogPost({ post, comments }: BlogPostProps) {
               </div>
             </div>
 
-            {/* Follow Button */}
-            <button className="px-6 py-3 border border-land text-land rounded-lg font-mono transition-all hover:bg-land/10 hover:shadow-[0_0_20px_rgba(44,255,5,0.4)]">
-              Follow
-            </button>
-
           </div>
         </div>
         <div className="mt-16">
@@ -478,7 +493,13 @@ function BlogPost({ post, comments }: BlogPostProps) {
             {renderComments(comments)}
           </div>
 
-          <form className="border border-land/30 rounded-lg p-6 bg-black/30">
+          <form
+            className="border border-land/30 rounded-lg p-6 bg-black/30"
+            onSubmit={(e) => {
+              e.preventDefault();
+              postComment(post.id);
+            }}
+          >
             <h3 className="text-xl font-bold mb-4 text-land">Add a comment</h3>
 
             <textarea
@@ -487,13 +508,15 @@ function BlogPost({ post, comments }: BlogPostProps) {
               placeholder="Share your thoughts..."
               className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)] transition-all resize-none font-mono"
               rows={4}
+              disabled={isPostingComment}
             />
 
             <button
               type="submit"
-              className="mt-4 px-8 py-3 bg-land text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono"
+              className="mt-4 px-8 py-3 bg-land text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isPostingComment || !comment.trim()}
             >
-              Post Comment
+              {isPostingComment ? 'Posting...' : 'Post Comment'}
             </button>
           </form>
         </div>
