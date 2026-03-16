@@ -94,6 +94,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
         ...prev,
         [commentId]: repliesArray, // assuming API returns array of replies
       }));
+      console.log(repliesArray)
     } catch (err) {
       console.error("Failed to fetch replies", err);
     } finally {
@@ -118,6 +119,17 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
       console.error("Fail to Make a Comment",error)
     } finally {
       setIsPostingComment(false);
+    }
+  }
+
+  const postReply = async(commentId:string)=> {
+    try {
+      await api.post(`/api/replies/${commentId}`,{content:replyText})
+      setReplyText('');
+      setVisibleReplies((prev) => new Set(prev).add(commentId));
+      await fetchReplies(commentId);
+    } catch (error) {
+      console.log("Failed to post Reply: ",error)
     }
   }
 
@@ -167,7 +179,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                         Reply
                       </button>
 
-                      {comment.replisCount > 0 && (
+                      {(comment.replisCount > 0 || (repliesMap[comment.id]?.length ?? 0) > 0) && (
                         <button
                           onClick={async () => {
                             const newSet = new Set(visibleReplies);
@@ -189,7 +201,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                         >
                           {repliesVisible
                             ? "Hide replies"
-                            : `View replies (${comment.replisCount})`}
+                            : `View replies (${(repliesMap[comment.id]?.length ?? comment.replisCount)})`}
                         </button>
                       )}
                     </div>
@@ -215,6 +227,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                           <button
                             type="submit"
                             className="px-4 py-2 bg-land text-black font-bold rounded text-sm"
+                            onClick={()=>postReply(comment.id)}
                           >
                             Reply
                           </button>
@@ -233,7 +246,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                     )}
 
                     {/* Replies Section (Only 1 Level) */}
-                    {repliesVisible && comment.replisCount > 0 && (
+                    {repliesVisible && (
                       <div className="mt-4 space-y-4 border-l-2 border-vio/30 pl-4">
 
                         {loadingReplies.has(comment.id) && (
