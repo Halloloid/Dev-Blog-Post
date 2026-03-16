@@ -2,9 +2,10 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Heart, Eye, MessageCircle, Github, Reply } from 'lucide-react';
+import { Heart, Eye, MessageCircle, Github, Reply, Trash2, Pencil } from 'lucide-react';
 import api from '@/config/api';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 interface Tag {
   id: string;
@@ -67,7 +68,20 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
   const [repliesMap, setRepliesMap] = useState<Record<string, PostComment[]>>({});
   const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
   const [isPostingComment, setIsPostingComment] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await api.get("/auth/me", { withCredentials: true });
+        setCurrentUserId(res.data?.id ?? null);
+      } catch {
+        setCurrentUserId(null);
+      }
+    };
+    fetchMe();
+  }, []);
 
   const onAuthorClick = async (user_name: string) => {
     navigate(`/profile/${user_name}`)
@@ -122,6 +136,52 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
     }
   }
 
+  const updateComment = async (commentId: string, currentContent: string) => {
+    const nextContent = window.prompt("Edit comment", currentContent);
+    if (nextContent === null) return;
+    if (!nextContent.trim()) return;
+    try {
+      await api.patch(`/api/comments/${commentId}`, { content: nextContent });
+      await onCommentPosted();
+    } catch (error) {
+      console.error("Failed to update comment", error);
+    }
+  }
+
+  const deleteComment = async (commentId: string) => {
+    const confirmed = window.confirm("Delete this comment?");
+    if (!confirmed) return;
+    try {
+      await api.delete(`/api/comments/${commentId}`);
+      await onCommentPosted();
+    } catch (error) {
+      console.error("Failed to delete comment", error);
+    }
+  }
+
+  const updateReply = async (commentId: string, replyId: string, currentContent: string) => {
+    const nextContent = window.prompt("Edit reply", currentContent);
+    if (nextContent === null) return;
+    if (!nextContent.trim()) return;
+    try {
+      await api.patch(`/api/replies/${replyId}`, { content: nextContent });
+      await fetchReplies(commentId);
+    } catch (error) {
+      console.error("Failed to update reply", error);
+    }
+  }
+
+  const deleteReply = async (commentId: string, replyId: string) => {
+    const confirmed = window.confirm("Delete this reply?");
+    if (!confirmed) return;
+    try {
+      await api.delete(`/api/replies/${replyId}`);
+      await fetchReplies(commentId);
+    } catch (error) {
+      console.error("Failed to delete reply", error);
+    }
+  }
+
   const postReply = async(commentId:string)=> {
     try {
       await api.post(`/api/replies/${commentId}`,{content:replyText})
@@ -159,6 +219,26 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                       <span className="text-sm text-gray-500 font-mono">
                         {formatDate(comment.created_at)}
                       </span>
+                      {currentUserId === comment.author.id && (
+                        <div className="ml-auto flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateComment(comment.id, comment.content)}
+                            className="text-gray-400 hover:text-land transition-colors"
+                            aria-label="Edit comment"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteComment(comment.id)}
+                            className="text-gray-400 hover:text-red-400 transition-colors"
+                            aria-label="Delete comment"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <p className="text-gray-300 leading-relaxed mb-3">
@@ -276,6 +356,26 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                                     <span className="text-sm text-gray-500 font-mono">
                                       {formatDate(reply.created_at)}
                                     </span>
+                                    {currentUserId === reply.author?.id && (
+                                      <div className="ml-auto flex items-center gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => updateReply(comment.id, reply.id, reply.content)}
+                                          className="text-gray-400 hover:text-vio transition-colors"
+                                          aria-label="Edit reply"
+                                        >
+                                          <Pencil size={14} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => deleteReply(comment.id, reply.id)}
+                                          className="text-gray-400 hover:text-red-400 transition-colors"
+                                          aria-label="Delete reply"
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
 
                                   <p className="text-gray-300 text-sm">
