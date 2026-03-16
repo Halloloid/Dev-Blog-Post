@@ -69,6 +69,9 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
   const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
   const [isPostingComment, setIsPostingComment] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingReply, setEditingReply] = useState<{ commentId: string; replyId: string } | null>(null);
+  const [editText, setEditText] = useState("");
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -136,13 +139,13 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
     }
   }
 
-  const updateComment = async (commentId: string, currentContent: string) => {
-    const nextContent = window.prompt("Edit comment", currentContent);
-    if (nextContent === null) return;
-    if (!nextContent.trim()) return;
+  const updateComment = async (commentId: string) => {
+    if (!editText.trim()) return;
     try {
-      await api.patch(`/api/comments/${commentId}`, { content: nextContent });
+      await api.patch(`/api/comments/${commentId}`, { content: editText });
       await onCommentPosted();
+      setEditingCommentId(null);
+      setEditText("");
     } catch (error) {
       console.error("Failed to update comment", error);
     }
@@ -159,13 +162,13 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
     }
   }
 
-  const updateReply = async (commentId: string, replyId: string, currentContent: string) => {
-    const nextContent = window.prompt("Edit reply", currentContent);
-    if (nextContent === null) return;
-    if (!nextContent.trim()) return;
+  const updateReply = async (commentId: string, replyId: string) => {
+    if (!editText.trim()) return;
     try {
-      await api.patch(`/api/replies/${replyId}`, { content: nextContent });
+      await api.patch(`/api/replies/${replyId}`, { content: editText });
       await fetchReplies(commentId);
+      setEditingReply(null);
+      setEditText("");
     } catch (error) {
       console.error("Failed to update reply", error);
     }
@@ -223,7 +226,11 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                         <div className="ml-auto flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => updateComment(comment.id, comment.content)}
+                            onClick={() => {
+                              setEditingCommentId(comment.id);
+                              setEditingReply(null);
+                              setEditText(comment.content);
+                            }}
                             className="text-gray-400 hover:text-land transition-colors"
                             aria-label="Edit comment"
                           >
@@ -241,9 +248,39 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                       )}
                     </div>
 
-                    <p className="text-gray-300 leading-relaxed mb-3">
-                      {comment.content}
-                    </p>
+                    {editingCommentId === comment.id ? (
+                      <div className="mb-3">
+                        <textarea
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-land transition-all resize-none font-mono text-sm"
+                          rows={3}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 bg-land text-black font-bold rounded text-xs"
+                            onClick={() => updateComment(comment.id)}
+                          >
+                            Update
+                          </button>
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 border border-gray-700 text-gray-400 rounded text-xs"
+                            onClick={() => {
+                              setEditingCommentId(null);
+                              setEditText("");
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-300 leading-relaxed mb-3">
+                        {comment.content}
+                      </p>
+                    )}
 
                     {/* Reply Button */}
                     <div className="flex items-center gap-4">
@@ -360,7 +397,11 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                                       <div className="ml-auto flex items-center gap-2">
                                         <button
                                           type="button"
-                                          onClick={() => updateReply(comment.id, reply.id, reply.content)}
+                                          onClick={() => {
+                                            setEditingReply({ commentId: comment.id, replyId: reply.id });
+                                            setEditingCommentId(null);
+                                            setEditText(reply.content);
+                                          }}
                                           className="text-gray-400 hover:text-vio transition-colors"
                                           aria-label="Edit reply"
                                         >
@@ -378,9 +419,39 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                                     )}
                                   </div>
 
-                                  <p className="text-gray-300 text-sm">
-                                    {reply.content}
-                                  </p>
+                                  {editingReply?.replyId === reply.id ? (
+                                    <div>
+                                      <textarea
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                        className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-vio transition-all resize-none font-mono text-sm"
+                                        rows={2}
+                                      />
+                                      <div className="flex gap-2 mt-2">
+                                        <button
+                                          type="button"
+                                          className="px-3 py-1.5 bg-vio text-black font-bold rounded text-xs"
+                                          onClick={() => updateReply(comment.id, reply.id)}
+                                        >
+                                          Update
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="px-3 py-1.5 border border-gray-700 text-gray-400 rounded text-xs"
+                                          onClick={() => {
+                                            setEditingReply(null);
+                                            setEditText("");
+                                          }}
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <p className="text-gray-300 text-sm">
+                                      {reply.content}
+                                    </p>
+                                  )}
                                 </div>
 
                               </div>
