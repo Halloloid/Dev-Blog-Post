@@ -13,6 +13,7 @@ export const syncLikesJob = async(req:Request,res:Response) => {
             continue;
         }
 
+        
         await prisma.post.update({
             where:{id:postId},
             data:{

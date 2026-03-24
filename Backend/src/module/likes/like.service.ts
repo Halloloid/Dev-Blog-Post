@@ -80,8 +80,7 @@ export const toggleLike = async(postId:String,userId:String,action:"like" | "unl
         [
             `likes:post:${postId}`,
             `likes:count:${postId}`,
-            `likes:delta:${postId}`,
-            "likes:dirty"
+            "likes:events"
         ],
         [userId,postId]
     )
