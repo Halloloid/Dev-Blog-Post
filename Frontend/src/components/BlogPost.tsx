@@ -61,6 +61,7 @@ interface BlogPostProps {
 function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes_count);
+  const [isLiking, setIsLiking] = useState(false);
   const [visibleReplies, setVisibleReplies] = useState<Set<string>>(new Set());
   const [comment, setComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -86,17 +87,80 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
     fetchMe();
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchLikeCount = async () => {
+      try {
+        const res = await api.get(`/api/likes/posts/${post.id}/count`);
+        if (isMounted) {
+          setLikeCount(res.data?.count ?? post.likes_count);
+        }
+      } catch {
+        if (isMounted) {
+          setLikeCount(post.likes_count);
+        }
+      }
+    };
+
+    fetchLikeCount();
+    setLiked(false);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [post.id, post.likes_count]);
+
+  useEffect(() => {
+    const fetchLiked = async () => {
+      try {
+        const res = await api.get(`/api/likes/posts/${post.id}/check`, { withCredentials: true });
+        setLiked(Boolean(res.data?.isLikedby));
+      } catch {
+        setLiked(false);
+      }
+    };
+
+    if (!currentUserId) {
+      setLiked(false);
+      return;
+    }
+
+    fetchLiked();
+  }, [currentUserId, post.id]);
+
   const onAuthorClick = async (user_name: string) => {
     navigate(`/profile/${user_name}`)
   }
 
-  const handleLike = () => {
-    if (liked) {
-      setLiked(false);
-      setLikeCount(likeCount - 1);
-    } else {
-      setLiked(true);
-      setLikeCount(likeCount + 1);
+  const handleLike = async () => {
+    if (!currentUserId || isLiking) return;
+
+    const prevLiked = liked;
+    const prevCount = likeCount;
+    const nextLiked = !liked;
+    const delta = nextLiked ? 1 : -1;
+
+    setLiked(nextLiked);
+    setLikeCount(Math.max(0, likeCount + delta));
+    setIsLiking(true);
+
+    try {
+      const res = await api.post(
+        "/api/likes",
+        { postId: post.id, action: nextLiked ? "like" : "unlike" },
+        { withCredentials: true }
+      );
+
+      if (!res.data) {
+        throw new Error("Like toggle failed");
+      }
+    } catch (error) {
+      console.error("Failed to toggle like", error);
+      setLiked(prevLiked);
+      setLikeCount(prevCount);
+    } finally {
+      setIsLiking(false);
     }
   };
 
@@ -598,7 +662,8 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
             <div className="flex items-center gap-6">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all ${liked
+                disabled={isLiking || !currentUserId}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all disabled:opacity-60 disabled:cursor-not-allowed ${liked
                     ? 'border-vio text-vio bg-vio/10 shadow-[0_0_20px_rgba(255,0,255,0.3)]'
                     : 'border-gray-700 text-gray-400 hover:border-vio hover:text-vio'
                   }`}
