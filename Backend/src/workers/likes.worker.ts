@@ -4,9 +4,10 @@ import { prisma } from "../config/db.js";
 const STREAM_KEY = "likes:events";
 const GROUP = "likes-group";
 const CONSUMER = "likes-worker-1";
+const MAX_BATCH_SIZE = 200;
+const FLUSH_WINDOW_MS = 4000;
+const POLL_BLOCK_MS = 1000;
 
-type XReadGroupEntry = [string, Record<string, string>];
-type XReadGroupResponse = [string, XReadGroupEntry[]][];
 
 function parseXReadGroupResponse(raw: unknown): LikeEvent[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
@@ -59,7 +60,7 @@ function fieldsToObject(data: Record<string, string> | string[]): Record<string,
 }
 
 
-const readBatch = async (count = 200, blockMs = 5000): Promise<LikeEvent[]> => {
+const readBatch = async (count = MAX_BATCH_SIZE, blockMs = POLL_BLOCK_MS): Promise<LikeEvent[]> => {
     const raw = await redis.xreadgroup(
         GROUP,
         CONSUMER,
@@ -71,6 +72,15 @@ const readBatch = async (count = 200, blockMs = 5000): Promise<LikeEvent[]> => {
         }
     ) 
     return parseXReadGroupResponse(raw);
+}
+
+const flushBufferedEvents = async (buffer: LikeEvent[]) => {
+    if (buffer.length === 0) return [];
+
+    const eventsToProcess = [...buffer];
+    buffer.length = 0;
+    await processBatch(eventsToProcess);
+    return buffer;
 }
 
 const processBatch = async (events: LikeEvent[]) => {
@@ -138,12 +148,50 @@ const main = async () => {
     console.log("Likes worker running...");
 
     while (true) {
-        const pending = await redis.xreadgroup(GROUP,CONSUMER,STREAM_KEY,"0",{count:200});
+        const pending = await redis.xreadgroup(GROUP,CONSUMER,STREAM_KEY,"0",{count:MAX_BATCH_SIZE});
         const pendingEvents = parseXReadGroupResponse(pending)
+        if (pendingEvents.length === 0) break;
         await processBatch(pendingEvents);
+    }
 
-        const events = await readBatch();
-        await processBatch(events)
+    const bufferedEvents: LikeEvent[] = [];
+    let firstBufferedAt = 0;
+
+    while (true) {
+        if (bufferedEvents.length === 0) {
+            const events = await readBatch(MAX_BATCH_SIZE, POLL_BLOCK_MS);
+            if (events.length === 0) continue;
+
+            bufferedEvents.push(...events);
+            firstBufferedAt = Date.now();
+            continue;
+        }
+
+        const elapsed = Date.now() - firstBufferedAt;
+        const remainingWindow = FLUSH_WINDOW_MS - elapsed;
+
+        if (remainingWindow <= 0 || bufferedEvents.length >= MAX_BATCH_SIZE) {
+            await flushBufferedEvents(bufferedEvents);
+            firstBufferedAt = 0;
+            continue;
+        }
+
+        const events = await readBatch(
+            Math.max(1, MAX_BATCH_SIZE - bufferedEvents.length),
+            Math.min(POLL_BLOCK_MS, remainingWindow)
+        );
+
+        if (events.length > 0) {
+            bufferedEvents.push(...events);
+        }
+
+        if (
+            bufferedEvents.length >= MAX_BATCH_SIZE ||
+            Date.now() - firstBufferedAt >= FLUSH_WINDOW_MS
+        ) {
+            await flushBufferedEvents(bufferedEvents);
+            firstBufferedAt = 0;
+        }
     }
 }
 
