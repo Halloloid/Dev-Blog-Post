@@ -125,7 +125,12 @@ const processBatch = async (events: LikeEvent[]) => {
         STREAM_KEY,
         GROUP,
         events.map(e => e.id)
-    )
+    );
+
+    await redis.xdel(
+        STREAM_KEY,
+        events.map(e => e.id)
+    );
 }
 
 const main = async () => {
