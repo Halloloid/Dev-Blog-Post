@@ -68,7 +68,6 @@ export async function hydrateLikesIfNeeded(postId: string) {
   const count = post?.likes_count ?? 0;
 
   await redis.set(`likes:count:${postId}`, count);
-  await redis.set(`likes:delta:${postId}`, 0);
 }
 
 

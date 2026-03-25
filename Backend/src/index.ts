@@ -10,7 +10,6 @@ import replyRoutes from "./module/replies/replies.routes.js";
 import commentRoutes from "./module/comments/comments.routes.js";
 import likeRoutes from "./module/likes/likes.routes.js";
 import { qstashMiddleware } from "./middlewares/qstash.middleware.js";
-import { syncLikesJob } from "./jobs/syncLikes.js";
 import { syncViewsToDB } from "./jobs/syncViews.js";
 import followerRoute from "./module/followers/followers.routes.js";
 import { combinedRateLimiter } from "./middlewares/rateLimiter.middleware.js";
@@ -57,7 +56,7 @@ app.post("/internal/sync-views", qstashMiddleware, async (req, res) => {
         res.status(500).json({ message: "Failed to sync views" });
     }
 });
-app.post("/internal/sync-likes",qstashMiddleware,syncLikesJob)
+// app.post("/internal/sync-likes",qstashMiddleware,syncLikesJob)
 
 app.use((_:Request,res:Response)=>{
     res.status(404).json({"Message":"No Such Routes"})
