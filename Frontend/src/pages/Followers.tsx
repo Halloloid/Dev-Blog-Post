@@ -114,6 +114,7 @@ export default function Followers() {
                     src={user.avatar_url}
                     alt={user.full_name}
                     className="w-12 h-12 rounded-full object-cover border border-blue/30"
+                    referrerPolicy="no-referrer"
                   />
                   <div>
                     <p className="text-white font-bold">{user.full_name}</p>

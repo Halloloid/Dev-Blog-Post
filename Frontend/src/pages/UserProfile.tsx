@@ -192,7 +192,12 @@ export default function UserProfile() {
               <div className="relative inline-block">
                 <div className="absolute -inset-4 bg-blue/20 blur-xl" />
                 <div className="relative w-48 h-48 border-4 border-blue p-2 bg-black">
-                  <img src={userData?.avatar_url} alt={userData?.full_name} className="w-full h-full object-cover" />
+                  <img
+                    src={userData?.avatar_url}
+                    alt={userData?.full_name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 {/* Circle decoration instead of rotated square */}
                 <div className="absolute -bottom-3 -right-3 w-20 h-20 bg-blue/80 shape-circle" />

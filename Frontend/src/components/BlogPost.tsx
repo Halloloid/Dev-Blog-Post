@@ -275,7 +275,11 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
             <div key={comment.id}>
               <div className="border border-gray-800 rounded-lg p-6 bg-black/30">
                 <div className="flex items-start gap-4">
-                  <img src={comment.author.avatar_url} className='w-10 h-10 rounded-full flex items-center justify-center' />
+                  <img
+                    src={comment.author.avatar_url}
+                    className='w-10 h-10 rounded-full flex items-center justify-center'
+                    referrerPolicy="no-referrer"
+                  />
 
 
                   <div className="flex-1">
@@ -447,6 +451,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                                   src={reply.author?.avatar_url}
                                   alt={reply.author?.user_name}
                                   className="w-8 h-8 rounded-full"
+                                  referrerPolicy="no-referrer"
                                 />
 
                                 <div className="flex-1">
@@ -706,6 +711,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                 src={post.user.avatar_url}
                 alt={post.user.user_name}
                 className="w-24 h-24 rounded-full border-2 border-land "
+                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 rounded-full border border-vio/40 animate-pulse" />
             </div>
