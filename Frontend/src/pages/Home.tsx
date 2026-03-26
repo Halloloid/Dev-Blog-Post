@@ -51,6 +51,16 @@ const Home = () => {
     };
 
     checkAuth();
+
+    const handleUsernameCreated = () => {
+      checkAuth();
+    };
+
+    window.addEventListener("username-created", handleUsernameCreated);
+
+    return () => {
+      window.removeEventListener("username-created", handleUsernameCreated);
+    };
   }, []);
   useEffect(() => {
     setLoading(true);
@@ -165,12 +175,23 @@ const Home = () => {
         <HyperText className="text-2xl">Dev_Blog</HyperText>
 
         <div className="flex gap-8">
-          <RippleButton onClick={() => navigate(`/createpost/${user.user_name}`)}>
-            <Plus size={16} className="mt-0.5" />
-            Create Post
-          </RippleButton>
+          {user?.user_name ? (
+            <RippleButton onClick={() => navigate(`/createpost/${user.user_name}`)}>
+              <Plus size={16} className="mt-0.5" />
+              Create Post
+            </RippleButton>
+          ) : (
+            <RippleButton disabled>
+              <Plus size={16} className="mt-0.5" />
+              Create Post
+            </RippleButton>
+          )}
           {user ? (
-            <RainbowButton size="icon" onClick={() => onAuthorClick(user.user_name)}>
+            <RainbowButton
+              size="icon"
+              onClick={() => user.user_name && onAuthorClick(user.user_name)}
+              disabled={!user.user_name}
+            >
               <img
                 src={user.avatar_url}
                 className="rounded-3xl p-0.5"
