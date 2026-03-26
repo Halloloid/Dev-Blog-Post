@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import FollowButton from '@/components/FollowButton';
-import { Users, Heart, FileText, Calendar } from 'lucide-react';
+import { Users, Heart, FileText, Calendar, AlertTriangle } from 'lucide-react';
 import userBg from "@/assets/userbg.png"
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '@/config/api';
@@ -9,18 +9,131 @@ import { type Post } from '@/components/PostCard';
 import { AnimatedCircularProgressBar } from '@/components/ui/animated-circular-progress-bar';
 import { useToast } from '@/components/ui/toast';
 
+const CAPTCHA_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+const createDeleteChallenge = () =>
+  Array.from({ length: 6 }, () => CAPTCHA_CHARS[Math.floor(Math.random() * CAPTCHA_CHARS.length)]).join('');
 
 interface PostListProps {
   posts: Post[];
+  canEdit: boolean;
+  profileUsername?: string;
+  onDeletePost: (post: Post) => void;
 }
 
+interface DeletePostModalProps {
+  post: Post;
+  challenge: string;
+  answer: string;
+  error: string;
+  isDeleting: boolean;
+  canDelete: boolean;
+  onAnswerChange: (value: string) => void;
+  onClose: () => void;
+  onConfirm: () => void;
+}
 
-function PostList({ posts }: PostListProps) {
-  const navigate = useNavigate()
+function DeletePostModal({
+  post,
+  challenge,
+  answer,
+  error,
+  isDeleting,
+  canDelete,
+  onAnswerChange,
+  onClose,
+  onConfirm,
+}: DeletePostModalProps) {
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-2xl border border-red-500/30 bg-[#09040d] p-6 shadow-[0_0_40px_rgba(239,68,68,0.18)]">
+        <div className="mb-5">
+          <p className="text-xs uppercase tracking-[0.35em] text-red-300/70">
+            Permanent Action
+          </p>
+          <div className="mt-3 flex items-start gap-3">
+            <div className="mt-1 rounded-full bg-red-500/10 p-2 text-red-300">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Delete this post?</h2>
+              <p className="mt-2 text-sm text-white/65">
+                <span className="font-semibold text-white">"{post.title}"</span> will be deleted
+                permanently. This action cannot be restored again after you confirm it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+            <p className="text-sm font-mono text-red-200">
+              Type this CAPTCHA to continue:
+            </p>
+            <p className="mt-2 text-2xl font-black tracking-[0.35em] text-white">{challenge}</p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-red-200">
+              CAPTCHA
+            </label>
+            <input
+              value={answer}
+              onChange={(event) => onAnswerChange(event.target.value.toUpperCase())}
+              placeholder="Enter the code exactly"
+              autoComplete="off"
+              disabled={isDeleting}
+              className="w-full rounded-xl border border-red-500/30 bg-black/40 px-4 py-3 text-white outline-none placeholder:text-white/25"
+            />
+            <p className="mt-2 text-xs text-white/45">
+              This extra step helps prevent accidental deletion.
+            </p>
+            {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={!canDelete || isDeleting}
+              className="flex-1 rounded-xl bg-red-500 px-4 py-3 font-semibold text-black transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isDeleting ? "Deleting..." : "Delete Post"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isDeleting}
+              className="rounded-xl border border-white/15 px-4 py-3 font-semibold text-white/75 transition hover:border-white hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PostList({ posts, canEdit, profileUsername, onDeletePost }: PostListProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onClick={() => navigate(`/post/${post.id}`)}/>
+        <PostCard
+          key={post.id}
+          post={post}
+          onClick={() => navigate(`/post/${post.id}`)}
+          showEditButton={canEdit}
+          onEdit={
+            canEdit && profileUsername
+              ? () => navigate(`/profile/${profileUsername}/posts/${post.id}/edit`)
+              : undefined
+          }
+          showDeleteButton={canEdit}
+          onDelete={canEdit ? () => onDeletePost(post) : undefined}
+        />
       ))}
     </div>
   );
@@ -49,6 +162,11 @@ export default function UserProfile() {
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; user_name: string } | null>(null);
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+  const [deleteChallenge, setDeleteChallenge] = useState('');
+  const [deleteAnswer, setDeleteAnswer] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
   const {username} = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -148,6 +266,75 @@ export default function UserProfile() {
       console.error("Error in Follow Api:", error);
     }
   };
+
+  const openDeleteModal = (post: Post) => {
+    setPostToDelete(post);
+    setDeleteChallenge(createDeleteChallenge());
+    setDeleteAnswer('');
+    setDeleteError('');
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeletingPost) return;
+    setPostToDelete(null);
+    setDeleteChallenge('');
+    setDeleteAnswer('');
+    setDeleteError('');
+  };
+
+  const handleDeletePost = async () => {
+    if (!postToDelete) return;
+
+    if (deleteAnswer.trim().toUpperCase() !== deleteChallenge) {
+      setDeleteError('Please type the CAPTCHA exactly before deleting.');
+      return;
+    }
+
+    setIsDeletingPost(true);
+    setDeleteError('');
+
+    try {
+      await api.delete(`/api/posts/${postToDelete.id}`, {
+        withCredentials: true,
+      });
+
+      const deletedPostId = postToDelete.id;
+      const deletedPostTitle = postToDelete.title;
+
+      setuserData((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          total_posts: Math.max(0, prev.total_posts - 1),
+          posts: prev.posts.filter((post) => post.id !== deletedPostId),
+        };
+      });
+
+      setPostToDelete(null);
+      setDeleteChallenge('');
+      setDeleteAnswer('');
+      setDeleteError('');
+
+      toast({
+        title: "Post deleted",
+        description: `"${deletedPostTitle}" was permanently removed.`,
+      });
+    } catch (error: any) {
+      const message = error?.response?.data?.message || 'Failed to delete post.';
+      setDeleteError(message);
+      toast({
+        title: "Delete failed",
+        description: message,
+        variant: "error",
+      });
+    } finally {
+      setIsDeletingPost(false);
+    }
+  };
+
+  const canConfirmDelete =
+    Boolean(postToDelete) && deleteAnswer.trim().toUpperCase() === deleteChallenge;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -313,7 +500,12 @@ export default function UserProfile() {
           </div>
 
           {/* Posts Grid */}
-          <PostList posts={userData?.posts ?? []} />
+          <PostList
+            posts={userData?.posts ?? []}
+            canEdit={isOwnProfile}
+            profileUsername={userData?.user_name}
+            onDeletePost={openDeleteModal}
+          />
         </div>
       </div>
 
@@ -337,6 +529,25 @@ export default function UserProfile() {
             <p className="text-sm font-mono text-blue">{progress}%</p>
           </div>
         </div>
+      )}
+
+      {postToDelete && (
+        <DeletePostModal
+          post={postToDelete}
+          challenge={deleteChallenge}
+          answer={deleteAnswer}
+          error={deleteError}
+          isDeleting={isDeletingPost}
+          canDelete={canConfirmDelete}
+          onAnswerChange={(value) => {
+            setDeleteAnswer(value);
+            if (deleteError) {
+              setDeleteError('');
+            }
+          }}
+          onClose={closeDeleteModal}
+          onConfirm={handleDeletePost}
+        />
       )}
     </div>
   );

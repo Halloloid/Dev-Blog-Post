@@ -1,4 +1,4 @@
-import { Eye, MessageCircle,Calendar,ThumbsUp} from 'lucide-react';
+import { Eye, MessageCircle, Calendar, Pencil, ThumbsUp, Trash2 } from 'lucide-react';
 
 export interface Post {
   id: string;
@@ -14,17 +14,74 @@ export interface Post {
 interface PostCardProps {
   post: Post;
   onClick?: () => void | Promise<void>;
+  onEdit?: () => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
+  showEditButton?: boolean;
+  showDeleteButton?: boolean;
 }
 
-export default function PostCard({ post,onClick}: PostCardProps) {
+export default function PostCard({
+  post,
+  onClick,
+  onEdit,
+  onDelete,
+  showEditButton = false,
+  showDeleteButton = false,
+}: PostCardProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const isClickable = Boolean(onClick);
+
   return (
-    <div onClick={onClick} className="group relative bg-black border-2 border-blue/20 hover:border-blue transition-all duration-300 overflow-hidden">
+    <div
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (!isClickable) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          void onClick?.();
+        }
+      }}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      className={`group relative bg-black border-2 border-blue/20 hover:border-blue transition-all duration-300 overflow-hidden ${isClickable ? 'cursor-pointer' : ''}`}
+    >
+      {((showEditButton && onEdit) || (showDeleteButton && onDelete)) && (
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          {showEditButton && onEdit && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                void onEdit();
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-blue/40 bg-black/85 px-3 py-2 text-xs font-mono text-blue transition-all hover:border-blue hover:bg-blue/10"
+              aria-label={`Edit ${post.title}`}
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
+            </button>
+          )}
+
+          {showDeleteButton && onDelete && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                void onDelete();
+              }}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-500/40 bg-black/85 text-red-400 transition-all hover:border-red-400 hover:bg-red-500/10 hover:text-red-300"
+              aria-label={`Delete ${post.title}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
       <div className="aspect-video overflow-hidden relative">
         <img
           src={post.featured_img}

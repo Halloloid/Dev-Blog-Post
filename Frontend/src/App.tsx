@@ -7,6 +7,7 @@ import UserProfile from "./pages/UserProfile"
 import Followings from "./pages/Followings"
 import Followers from "./pages/Followers"
 import CreatePost from "./pages/CreatePost"
+import UpdatePost from "./pages/UpdatePost"
 import api from "./config/api"
 import UsernameSetupModal from "./components/UsernameSetupModal"
 
@@ -65,6 +66,7 @@ const App = () => {
         <Route path="/profile/:username/following" element={<Followings/>}/>
         <Route path="/profile/:username/followers" element={<Followers/>}/>
         <Route path="/createpost/:username" element={<CreatePost/>}/>
+        <Route path="/profile/:username/posts/:id/edit" element={<UpdatePost/>}/>
       </Routes>
     </>
   )
