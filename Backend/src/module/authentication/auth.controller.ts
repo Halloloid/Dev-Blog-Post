@@ -65,19 +65,18 @@ export const googleCallback = async(req:Request,res:Response)=>{
         );
 
         const {email,name,picture} = user_data.data;
-        let user = await prisma.user.findUnique({
-            where:{email}
-        });
-        if(!user){
-            user = await prisma.user.create({
-                data:{
-                    email:email,
-                    full_name:name,
-                    avatar_url:picture
-                }
-
-            })
-        }
+        const user = await prisma.user.upsert({
+            where:{email},
+            update:{
+                full_name:name,
+                avatar_url:picture
+            },
+            create:{
+                email:email,
+                full_name:name,
+                avatar_url:picture
+            }
+        })
 
         //Create the JWT 
         const jwtToken = jwt.sign(
