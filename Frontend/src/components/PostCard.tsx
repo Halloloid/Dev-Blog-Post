@@ -13,9 +13,10 @@ export interface Post {
 
 interface PostCardProps {
   post: Post;
+  onClick?: () => void | Promise<void>;
 }
 
-export default function PostCard({ post}: PostCardProps) {
+export default function PostCard({ post,onClick}: PostCardProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -23,7 +24,7 @@ export default function PostCard({ post}: PostCardProps) {
   };
 
   return (
-    <div className="group relative bg-black border-2 border-blue/20 hover:border-blue transition-all duration-300 overflow-hidden">
+    <div onClick={onClick} className="group relative bg-black border-2 border-blue/20 hover:border-blue transition-all duration-300 overflow-hidden">
       <div className="aspect-video overflow-hidden relative">
         <img
           src={post.featured_img}
