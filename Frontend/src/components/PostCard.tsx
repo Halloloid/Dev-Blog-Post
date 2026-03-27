@@ -2,13 +2,14 @@ import { Eye, MessageCircle, Calendar, Pencil, ThumbsUp, Trash2 } from 'lucide-r
 
 export interface Post {
   id: string;
-  title: string;
+  title: string | null;
   created_at: string;
-  featured_img:string;
-  likes_count:number;
+  featured_img: string | null;
+  likes_count: number;
   view_count: number;
   comments_count: number;
-  exceprt: string;
+  exceprt: string | null;
+  status: 'draft' | 'published' | string;
 }
 
 interface PostCardProps {
@@ -28,6 +29,8 @@ export default function PostCard({
   showEditButton = false,
   showDeleteButton = false,
 }: PostCardProps) {
+  const displayTitle = post.title?.trim() || (post.status === 'draft' ? 'Untitled Draft' : 'Untitled Post');
+  const displayExcerpt = post.exceprt?.trim() || 'No excerpt yet.';
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -60,7 +63,7 @@ export default function PostCard({
                 void onEdit();
               }}
               className="inline-flex items-center gap-2 rounded-full border border-blue/40 bg-black/85 px-3 py-2 text-xs font-mono text-blue transition-all hover:border-blue hover:bg-blue/10"
-              aria-label={`Edit ${post.title}`}
+              aria-label={`Edit ${displayTitle}`}
             >
               <Pencil className="h-4 w-4" />
               Edit
@@ -75,7 +78,7 @@ export default function PostCard({
                 void onDelete();
               }}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-500/40 bg-black/85 text-red-400 transition-all hover:border-red-400 hover:bg-red-500/10 hover:text-red-300"
-              aria-label={`Delete ${post.title}`}
+              aria-label={`Delete ${displayTitle}`}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -83,12 +86,28 @@ export default function PostCard({
         </div>
       )}
       <div className="aspect-video overflow-hidden relative">
-        <img
-          src={post.featured_img}
-          alt={post.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+        {post.featured_img ? (
+          <img
+            src={post.featured_img}
+            alt={displayTitle}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-blue/15 via-black to-black text-center">
+            <div className="px-6">
+              <p className="text-xs font-mono uppercase tracking-[0.3em] text-blue/70">
+                {post.status === 'draft' ? 'Draft Post' : 'No Cover Image'}
+              </p>
+              <p className="mt-3 text-lg font-bold text-white/80">{displayTitle}</p>
+            </div>
+          </div>
+        )}
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent opacity-80" />
+        {post.status === 'draft' && (
+          <div className="absolute bottom-4 left-4 rounded-full border border-amber-300/40 bg-black/80 px-3 py-1 text-xs font-mono uppercase tracking-[0.25em] text-amber-200">
+            Draft
+          </div>
+        )}
       </div>
 
       <div className="p-6 relative">
@@ -98,10 +117,10 @@ export default function PostCard({
         </div>
 
         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue transition-colors duration-300">
-          {post.title}
+          {displayTitle}
         </h3>
 
-        <p className="text-gray-400 mb-4 line-clamp-2">{post.exceprt}</p>
+        <p className="text-gray-400 mb-4 line-clamp-2">{displayExcerpt}</p>
 
         <div className="flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2 text-blue">

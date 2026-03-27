@@ -1,5 +1,25 @@
 import { Request,Response } from "express";
 import { prisma } from "../../config/db.js";
+import jwt from "jsonwebtoken";
+
+const getOptionalUserId = (req: Request) => {
+    const token = req.cookies?.access_token || req.headers.authorization?.split(" ")[1];
+    if (!token) return null;
+
+    try {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) return null;
+
+        const decoded = jwt.verify(token, secret);
+        if (typeof decoded === "object" && decoded && "sub" in decoded) {
+            return String(decoded.sub);
+        }
+    } catch {
+        return null;
+    }
+
+    return null;
+};
 
 export const publicUserProfile = async(req:Request,res:Response) => {
     try {
@@ -22,31 +42,41 @@ export const publicUserProfile = async(req:Request,res:Response) => {
                 total_posts:true,
                 
                 created_at:true,
-
-                posts:{
-                    where:{
-                        status:"published"
-                    },
-                    orderBy:{
-                        created_at:"desc"
-                    },
-                    select:{
-                        id:true,
-                        title:true,
-                        created_at:true,
-                        view_count:true,
-                        comments_count:true,
-                        likes_count:true,
-                        featured_img:true,
-                        exceprt:true
-                    }
-                }
             }
         })
 
         if(!user) return res.status(404).json({message:"No such User"});
 
-        res.status(200).json(user);
+        const requesterId = getOptionalUserId(req);
+        const isOwner = requesterId === user.id;
+
+        const posts = await prisma.post.findMany({
+            where:{
+                created_by:user.id,
+                status:isOwner ? {
+                    in:["published","draft"]
+                } : "published"
+            },
+            orderBy:{
+                created_at:"desc"
+            },
+            select:{
+                id:true,
+                title:true,
+                created_at:true,
+                view_count:true,
+                comments_count:true,
+                likes_count:true,
+                featured_img:true,
+                exceprt:true,
+                status:true
+            }
+        });
+
+        res.status(200).json({
+            ...user,
+            posts
+        });
     } catch (error:any) {
         res.status(500).json({message:"Server Error"})
     }

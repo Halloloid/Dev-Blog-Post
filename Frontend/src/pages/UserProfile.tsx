@@ -21,6 +21,8 @@ interface PostListProps {
   onDeletePost: (post: Post) => void;
 }
 
+type PostFilter = 'published' | 'draft';
+
 interface DeletePostModalProps {
   post: Post;
   challenge: string;
@@ -124,7 +126,14 @@ function PostList({ posts, canEdit, profileUsername, onDeletePost }: PostListPro
         <PostCard
           key={post.id}
           post={post}
-          onClick={() => navigate(`/post/${post.id}`)}
+          onClick={() => {
+            if (post.status === 'draft' && canEdit && profileUsername) {
+              navigate(`/profile/${profileUsername}/posts/${post.id}/edit`);
+              return;
+            }
+
+            navigate(`/post/${post.id}`);
+          }}
           showEditButton={canEdit}
           onEdit={
             canEdit && profileUsername
@@ -167,12 +176,14 @@ export default function UserProfile() {
   const [deleteAnswer, setDeleteAnswer] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [activePostFilter, setActivePostFilter] = useState<PostFilter>('published');
   const {username} = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setActivePostFilter('published');
   }, [username]);
 
   useEffect(()=>{
@@ -299,7 +310,7 @@ export default function UserProfile() {
       });
 
       const deletedPostId = postToDelete.id;
-      const deletedPostTitle = postToDelete.title;
+      const deletedPostTitle = postToDelete.title?.trim() || 'Untitled Post';
 
       setuserData((prev) => {
         if (!prev) return prev;
@@ -335,6 +346,24 @@ export default function UserProfile() {
 
   const canConfirmDelete =
     Boolean(postToDelete) && deleteAnswer.trim().toUpperCase() === deleteChallenge;
+
+  const publishedPosts = (userData?.posts ?? []).filter((post) => post.status === 'published');
+  const draftPosts = (userData?.posts ?? []).filter((post) => post.status === 'draft');
+  const visiblePosts = isOwnProfile
+    ? activePostFilter === 'draft'
+      ? draftPosts
+      : publishedPosts
+    : publishedPosts;
+  const visibleSectionTitle = isOwnProfile
+    ? activePostFilter === 'draft'
+      ? 'Draft Posts'
+      : 'Published Posts'
+    : 'Latest Posts';
+  const visibleSectionDescription = isOwnProfile
+    ? activePostFilter === 'draft'
+      ? 'Only you can see these drafts. Click any draft to continue editing it.'
+      : 'These are the posts visible to everyone.'
+    : `Explore ${userData?.full_name}'s recent articles`;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -494,18 +523,60 @@ export default function UserProfile() {
           <div className="mb-12 relative">
             <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-1 bg-blue" />
-              <h2 className="text-4xl font-black uppercase tracking-tight">Latest Posts</h2>
+              <h2 className="text-4xl font-black uppercase tracking-tight">{visibleSectionTitle}</h2>
             </div>
-            <p className="text-gray-400 ml-16 font-mono">Explore {userData?.full_name}'s recent articles</p>
+            <p className="text-gray-400 ml-16 font-mono">{visibleSectionDescription}</p>
           </div>
 
+          {isOwnProfile && (
+            <div className="mb-10 flex flex-wrap items-center gap-3 ml-16">
+              <button
+                type="button"
+                onClick={() => setActivePostFilter('published')}
+                className={`rounded-full border px-5 py-2 text-sm font-mono uppercase tracking-[0.2em] transition-all ${
+                  activePostFilter === 'published'
+                    ? 'border-blue bg-blue/10 text-blue shadow-[0_0_20px_rgba(0,180,255,0.15)]'
+                    : 'border-blue/20 text-gray-400 hover:border-blue/50 hover:text-white'
+                }`}
+              >
+                Published ({publishedPosts.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePostFilter('draft')}
+                className={`rounded-full border px-5 py-2 text-sm font-mono uppercase tracking-[0.2em] transition-all ${
+                  activePostFilter === 'draft'
+                    ? 'border-amber-300/50 bg-amber-300/10 text-amber-200 shadow-[0_0_20px_rgba(252,211,77,0.12)]'
+                    : 'border-blue/20 text-gray-400 hover:border-blue/50 hover:text-white'
+                }`}
+              >
+                Draft ({draftPosts.length})
+              </button>
+            </div>
+          )}
+
+          {visiblePosts.length === 0 && (
+            <div className="ml-16 rounded-2xl border border-blue/20 bg-black/60 p-8 text-center">
+              <p className="text-sm font-mono uppercase tracking-[0.3em] text-blue/70">
+                {isOwnProfile && activePostFilter === 'draft' ? 'No Drafts Yet' : 'No Posts Yet'}
+              </p>
+              <p className="mt-3 text-gray-400">
+                {isOwnProfile && activePostFilter === 'draft'
+                  ? 'Your draft posts will appear here as you save them.'
+                  : 'There are no posts to show in this section right now.'}
+              </p>
+            </div>
+          )}
+
           {/* Posts Grid */}
-          <PostList
-            posts={userData?.posts ?? []}
-            canEdit={isOwnProfile}
-            profileUsername={userData?.user_name}
-            onDeletePost={openDeleteModal}
-          />
+          {visiblePosts.length > 0 && (
+            <PostList
+              posts={visiblePosts}
+              canEdit={isOwnProfile}
+              profileUsername={userData?.user_name}
+              onDeletePost={openDeleteModal}
+            />
+          )}
         </div>
       </div>
 
