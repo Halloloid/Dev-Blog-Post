@@ -6,6 +6,78 @@ import crypto from "crypto"
 import { trackPostView } from "./view.service.js";
 import sharp from "sharp";
 
+const allowedMime = new Set(["image/png", "image/jpeg", "image/jpg", "image/gif"]);
+const allowedExt = new Set(["png", "jpg", "jpeg", "gif"]);
+const dangerousExt = new Set(["php", "phtml", "phar", "phps", "php5", "php7", "php8"]);
+
+const uploadPostImage = async(file: Express.Multer.File) => {
+    if(!allowedMime.has(file.mimetype)) {
+        throw new Error("Only PNG, JPG or GIF images are allowed");
+    }
+
+    const originalName = (file.originalname || "").toLowerCase();
+    const parts = originalName.split(".").filter(Boolean);
+    const lastExt = parts.length > 0 ? parts[parts.length - 1] : "";
+    const hasDangerous = parts.slice(0, -1).some((ext) => dangerousExt.has(ext));
+    if(!allowedExt.has(lastExt) || hasDangerous) {
+        throw new Error("Invalid image filename");
+    }
+
+    const buffer = file.buffer;
+    const isPng = buffer.length >= 8 &&
+        buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47 &&
+        buffer[4] === 0x0D && buffer[5] === 0x0A && buffer[6] === 0x1A && buffer[7] === 0x0A;
+    const isJpeg = buffer.length >= 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+    const isGif = buffer.length >= 6 &&
+        buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38 &&
+        (buffer[4] === 0x37 || buffer[4] === 0x39) && buffer[5] === 0x61;
+
+    if(!isPng && !isJpeg && !isGif) {
+        throw new Error("Invalid image file");
+    }
+
+    if(file.size > 5 * 1024 * 1024) {
+        throw new Error("File Too Large(Max 5MB)");
+    }
+
+    let uploadBuffer = file.buffer;
+    try {
+        uploadBuffer = await sharp(file.buffer, { animated: true })
+            .webp({ quality: 90 })
+            .toBuffer();
+    } catch (error:any) {
+        console.error("Image compression failed", error);
+        throw new Error("Invalid image file");
+    }
+
+    const streamUpload = (fileBuffer:Buffer) => {
+        return new Promise<any>((resolve,reject)=>{
+            const stream = cloudinary.uploader.upload_stream(
+                {folder:"posts", format:"webp"},
+                (error,result) => {
+                    if(result) resolve(result);
+                    else reject(error)
+                }
+            );
+            stream.end(fileBuffer)
+        })
+    }
+
+    return streamUpload(uploadBuffer);
+};
+
+const normalizeTagIds = (input: unknown) => {
+    if(input === undefined) return null;
+
+    const values = Array.isArray(input) ? input : [input];
+    const normalized = values
+        .flatMap((value) => typeof value === "string" ? value.split(",") : [])
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+    return Array.from(new Set(normalized));
+};
+
 export const posts = async(req:Request,res:Response)=>{
     
     try {
@@ -255,7 +327,20 @@ export const editablePost = async(req:Request,res:Response) => {
                 content: true,
                 exceprt: true,
                 repo_link: true,
+                featured_img: true,
+                status: true,
                 created_by: true,
+                tags: {
+                    select: {
+                        tag: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true
+                            }
+                        }
+                    }
+                },
                 user: {
                     select: {
                         user_name: true
@@ -272,7 +357,10 @@ export const editablePost = async(req:Request,res:Response) => {
             return res.status(403).json({ message: "You cannot edit others posts" });
         }
 
-        return res.status(200).json(post);
+        return res.status(200).json({
+            ...post,
+            tags: post.tags.map((item) => item.tag)
+        });
     } catch (error:any) {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
@@ -298,63 +386,11 @@ export const createPost = async(req:Request,res:Response) => {
 
         let result:any = null
         if(req.file){
-            const allowedMime = new Set(["image/png", "image/jpeg", "image/jpg", "image/gif"]);
-            const allowedExt = new Set(["png", "jpg", "jpeg", "gif"]);
-            const dangerousExt = new Set(["php", "phtml", "phar", "phps", "php5", "php7", "php8"]);
-            
-            if(!allowedMime.has(req.file.mimetype)) {
-                return res.status(400).json({message:"Only PNG, JPG or GIF images are allowed"});
-            }
-            
-            const originalName = (req.file.originalname || "").toLowerCase();
-            const parts = originalName.split(".").filter(Boolean);
-            const lastExt = parts.length > 0 ? parts[parts.length - 1] : "";
-            const hasDangerous = parts.slice(0, -1).some((ext) => dangerousExt.has(ext));
-            if(!allowedExt.has(lastExt) || hasDangerous) {
-                return res.status(400).json({message:"Invalid image filename"});
-            }
-            
-            const buffer = req.file.buffer;
-            const isPng = buffer.length >= 8 &&
-            buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47 &&
-            buffer[4] === 0x0D && buffer[5] === 0x0A && buffer[6] === 0x1A && buffer[7] === 0x0A;
-            const isJpeg = buffer.length >= 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
-            const isGif = buffer.length >= 6 &&
-            buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38 &&
-            (buffer[4] === 0x37 || buffer[4] === 0x39) && buffer[5] === 0x61;
-            
-            if(!isPng && !isJpeg && !isGif) {
-                return res.status(400).json({message:"Invalid image file"});
-            }
-            
-            //Check Size
-            if(req.file.size>5*1024*1024) return res.status(400).json({message:"File Too Large(Max 5MB)"});
-            
-            let uploadBuffer = req.file.buffer;
             try {
-                uploadBuffer = await sharp(req.file.buffer, { animated: true })
-                .webp({ quality: 90 })
-                .toBuffer();
+                result = await uploadPostImage(req.file);
             } catch (error:any) {
-                console.error("Image compression failed", error);
-                return res.status(400).json({message:"Invalid image file"});
+                return res.status(400).json({message:error.message || "Invalid image file"});
             }
-            
-            //As Cloudinary uses Streams; inMemoryStorage we need a small helper
-            const streamUpload = (fileBuffer:Buffer) => {
-                return new Promise<any>((resolve,reject)=>{
-                    const stream = cloudinary.uploader.upload_stream(
-                        {folder:"posts", format:"webp"},
-                        (error,result) => {
-                            if(result) resolve(result);
-                            else reject(error)
-                        }
-                    );
-                    stream.end(fileBuffer)
-                })
-            }
-            
-            result = await streamUpload(uploadBuffer);
         }
         
 
@@ -400,34 +436,104 @@ export const updatePost = async(req:Request,res:Response) => {
             return res.status(400).json({message:"Invalid Post Id"})
         }
         const userId = req.user!.sub;
-
-        // Allow only specific fields
-        const allowedFields = ["title", "content","exceprt","repo_link"];
-        const dataToUpdate: any = {};
-    
-        for (const field of allowedFields) {
-          if (req.body[field] !== undefined) {
-            dataToUpdate[field] = req.body[field];
-          }
-        }
-    
-        // Prevent empty update
-        if (Object.keys(dataToUpdate).length === 0) {
-          return res.status(400).json({
-            message: "No valid fields provided for update",
-          });
-        }
         const post = await prisma.post.findUnique({
-            where:{id}
+            where:{id},
+            include:{
+                tags:{
+                    select:{
+                        tag_id:true
+                    }
+                }
+            }
         })
 
         if(!post) return res.status(404).json({message:"Post Not Found"});
 
         if(post.created_by !== userId) return res.status(403).json({message:"You cannot Update Others Posts"});
 
+        const isDraftPost = post.status === "draft";
+        const allowedFields = isDraftPost
+            ? ["title", "content", "exceprt", "repo_link", "status"]
+            : ["title", "content", "exceprt", "repo_link"];
+        const dataToUpdate: any = {};
+
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                dataToUpdate[field] = req.body[field];
+            }
+        }
+
+        const parsedTags = isDraftPost
+            ? normalizeTagIds(req.body["tags[]"] ?? req.body.tags)
+            : null;
+        const nextStatus =
+            isDraftPost && (req.body.status === "draft" || req.body.status === "published")
+                ? req.body.status
+                : post.status;
+
+        if (req.file) {
+            try {
+                const uploadedImage = await uploadPostImage(req.file);
+                dataToUpdate.featured_img = uploadedImage.secure_url;
+            } catch (error:any) {
+                return res.status(400).json({message:error.message || "Invalid image file"});
+            }
+        }
+
+        if (parsedTags) {
+            dataToUpdate.tags = {
+                deleteMany: {},
+                create: parsedTags.map((tagId:string)=>({
+                    tag:{
+                        connect:{id:tagId}
+                    }
+                }))
+            };
+        }
+
+        if (isDraftPost) {
+            dataToUpdate.status = nextStatus;
+
+            if (nextStatus === "published") {
+                const resultingTitle = dataToUpdate.title ?? post.title;
+                const resultingContent = dataToUpdate.content ?? post.content;
+                const resultingExcerpt = dataToUpdate.exceprt ?? post.exceprt;
+                const resultingRepoLink = dataToUpdate.repo_link ?? post.repo_link;
+                const resultingImage = dataToUpdate.featured_img ?? post.featured_img;
+                const resultingTags = parsedTags ?? post.tags.map((item) => item.tag_id);
+
+                if(!resultingTitle || !resultingContent || !resultingExcerpt || !resultingRepoLink || !resultingImage){
+                    return res.status(400).json({message:"Missing Required Field"});
+                }
+
+                if(resultingTags.length === 0){
+                    return res.status(400).json({message:"At least one tag is required"});
+                }
+            }
+        }
+
+        if (Object.keys(dataToUpdate).length === 0) {
+            return res.status(400).json({
+                message: "No valid fields provided for update",
+            });
+        }
+
         const updatePost = await prisma.post.update({
             where:{id},
-            data:dataToUpdate
+            data:dataToUpdate,
+            include:{
+                tags:{
+                    select:{
+                        tag:{
+                            select:{
+                                id:true,
+                                name:true,
+                                slug:true
+                            }
+                        }
+                    }
+                }
+            }
         })
 
         //redis cache invalidation
@@ -438,7 +544,10 @@ export const updatePost = async(req:Request,res:Response) => {
         } catch (error:any) {
             console.error("Redis Cache Delete Error",error)
         }
-        res.status(200).json(updatePost)
+        res.status(200).json({
+            ...updatePost,
+            tags:updatePost.tags.map((item)=>item.tag)
+        })
     } catch (error:any) {
         console.error(error)
         res.status(500).json({message:"Internal Server Error"})

@@ -12,7 +12,7 @@ postRoutes.get("/:id",specificPost)
 
 postRoutes.post("/",authMiddleware,upload.single("featured_img"),createPost)
 
-postRoutes.put("/:id",authMiddleware,updatePost)
+postRoutes.put("/:id",authMiddleware,upload.single("featured_img"),updatePost)
 
 postRoutes.patch("/:id/publish",authMiddleware,publishPost)
 

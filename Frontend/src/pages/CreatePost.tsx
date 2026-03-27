@@ -5,7 +5,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Upload, AlertCircle, Check, X } from 'lucide-react';
 import api from '@/config/api';
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 
 interface FormErrors {
@@ -35,6 +35,17 @@ interface FormData {
   imageFile: File | null;
 }
 
+interface EditableDraftResponse {
+  id: string;
+  title: string | null;
+  content: string | null;
+  repo_link: string | null;
+  exceprt: string | null;
+  featured_img: string | null;
+  status: 'draft' | 'published' | 'archived';
+  tags: TagOption[];
+}
+
 function CreatePost() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -53,6 +64,7 @@ function CreatePost() {
   const [successMessage, setSuccessMessage] = useState('');
   const [apiError, setApiError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingDraft, setIsLoadingDraft] = useState(false);
   const [progress, setProgress] = useState(10);
   const [availableTags, setAvailableTags] = useState<TagOption[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -60,6 +72,9 @@ function CreatePost() {
   const tagInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
+  const isDraftMode = Boolean(draftId);
 
   const validateForm = (mode: 'draft' | 'published'): FormErrors => {
     const newErrors: FormErrors = {};
@@ -167,6 +182,56 @@ function CreatePost() {
     fetchTags();
   }, []);
 
+  useEffect(() => {
+    if (!draftId) return;
+
+    setIsLoadingDraft(true);
+    setApiError('');
+    setProgress(10);
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => (prev >= 90 ? 90 : prev + 10));
+    }, 250);
+
+    const fetchDraft = async () => {
+      try {
+        const response = await api.get<EditableDraftResponse>(`/api/posts/${draftId}/edit`, {
+          withCredentials: true,
+        });
+
+        const draft = response.data;
+
+        if (draft.status !== 'draft') {
+          navigate(`/profile/${username}/posts/${draftId}/edit`, { replace: true });
+          return;
+        }
+
+        setFormData({
+          title: draft.title ?? '',
+          content: draft.content ?? '',
+          repoLink: draft.repo_link ?? '',
+          tags: draft.tags ?? [],
+          excerpt: draft.exceprt ?? '',
+          status: 'draft',
+          imageUrl: draft.featured_img ?? '',
+          imageFile: null,
+        });
+        setImagePreview(draft.featured_img ?? '');
+      } catch (error: any) {
+        const message = error?.response?.data?.message || 'Failed to load draft';
+        setApiError(message);
+      } finally {
+        clearInterval(progressInterval);
+        setProgress(100);
+        setIsLoadingDraft(false);
+      }
+    };
+
+    void fetchDraft();
+
+    return () => clearInterval(progressInterval);
+  }, [draftId, navigate, username]);
+
   const handlePublish = async () => {
     const newErrors = validateForm(formData.status);
     if (formData.status === 'draft' || Object.keys(newErrors).length === 0) {
@@ -192,20 +257,37 @@ function CreatePost() {
       }
 
       try {
-        await api.post("/api/posts/", payload, {
-          withCredentials: true
-        });
+        if (isDraftMode && draftId) {
+          await api.put(`/api/posts/${draftId}`, payload, {
+            withCredentials: true
+          });
+        } else {
+          await api.post("/api/posts/", payload, {
+            withCredentials: true
+          });
+        }
         setApiError('');
-        setSuccessMessage('Post created successfully!');
+        setSuccessMessage(
+          isDraftMode
+            ? formData.status === 'published'
+              ? 'Draft published successfully!'
+              : 'Draft updated successfully!'
+            : 'Post created successfully!'
+        );
         setProgress(100);
         setTimeout(() => {
           setSuccessMessage('');
+          if (isDraftMode && draftId) {
+            navigate(formData.status === 'published' ? `/post/${draftId}` : `/profile/${username}`);
+            return;
+          }
+
           navigate("/home");
         }, 2000);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Failed to create post";
+        const message = error?.response?.data?.message || (isDraftMode ? "Failed to update draft" : "Failed to create post");
         setApiError(message);
-        console.error("Failed to create post", error);
+        console.error(isDraftMode ? "Failed to update draft" : "Failed to create post", error);
       } finally {
         clearInterval(progressInterval);
         setIsSubmitting(false);
@@ -263,7 +345,9 @@ function CreatePost() {
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100">
       <div className="sticky top-0 z-50 bg-[#0a0a0a] border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-land">Create New Post</h1>
+          <h1 className="text-2xl font-bold text-land">
+            {isDraftMode ? 'Continue Draft' : 'Create New Post'}
+          </h1>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowPreview(!showPreview)}
@@ -275,7 +359,8 @@ function CreatePost() {
               {showPreview ? 'Edit' : 'Preview'}
             </button>
             <button
-              className="px-4 py-2 border border-gray-700 text-gray-400 rounded-lg hover:border-white hover:text-white transition-all font-mono" onClick={() => navigate("/home")}
+              className="px-4 py-2 border border-gray-700 text-gray-400 rounded-lg hover:border-white hover:text-white transition-all font-mono"
+              onClick={() => navigate(isDraftMode && username ? `/profile/${username}` : "/home")}
             >
               Back
             </button>
@@ -566,10 +651,17 @@ function CreatePost() {
                   onClick={handlePublish}
                   className="flex-1 px-8 py-3 bg-land text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono"
                 >
-                  {formData.status === 'published' ? 'Publish Post' : 'Save Draft'}
+                  {isDraftMode
+                    ? formData.status === 'published'
+                      ? 'Publish Draft'
+                      : 'Update Draft'
+                    : formData.status === 'published'
+                      ? 'Publish Post'
+                      : 'Save Draft'}
                 </button>
                 <button
-
+                  type="button"
+                  onClick={() => navigate(isDraftMode && username ? `/profile/${username}` : "/home")}
                   className="px-8 py-3 border border-gray-700 text-gray-400 rounded-lg hover:border-white hover:text-white transition-all font-mono"
                 >
                   Cancel
@@ -724,7 +816,7 @@ function CreatePost() {
         </div>
       </div>
 
-      {isSubmitting && (
+      {(isSubmitting || isLoadingDraft) && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/35 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar

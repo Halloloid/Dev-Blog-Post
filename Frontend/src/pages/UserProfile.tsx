@@ -128,7 +128,7 @@ function PostList({ posts, canEdit, profileUsername, onDeletePost }: PostListPro
           post={post}
           onClick={() => {
             if (post.status === 'draft' && canEdit && profileUsername) {
-              navigate(`/profile/${profileUsername}/posts/${post.id}/edit`);
+              navigate(`/createpost/${profileUsername}?draft=${post.id}`);
               return;
             }
 
@@ -137,7 +137,11 @@ function PostList({ posts, canEdit, profileUsername, onDeletePost }: PostListPro
           showEditButton={canEdit}
           onEdit={
             canEdit && profileUsername
-              ? () => navigate(`/profile/${profileUsername}/posts/${post.id}/edit`)
+              ? () => navigate(
+                  post.status === 'draft'
+                    ? `/createpost/${profileUsername}?draft=${post.id}`
+                    : `/profile/${profileUsername}/posts/${post.id}/edit`
+                )
               : undefined
           }
           showDeleteButton={canEdit}
