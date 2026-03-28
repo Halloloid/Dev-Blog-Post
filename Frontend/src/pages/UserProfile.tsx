@@ -47,8 +47,8 @@ function DeletePostModal({
   onConfirm,
 }: DeletePostModalProps) {
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border border-red-500/30 bg-[#09040d] p-6 shadow-[0_0_40px_rgba(239,68,68,0.18)]">
+    <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-2xl border border-red-500/30 bg-[#09040d] p-6">
         <div className="mb-5">
           <p className="text-xs uppercase tracking-[0.35em] text-red-300/70">
             Permanent Action
@@ -539,7 +539,7 @@ export default function UserProfile() {
                 onClick={() => setActivePostFilter('published')}
                 className={`rounded-full border px-5 py-2 text-sm font-mono uppercase tracking-[0.2em] transition-all ${
                   activePostFilter === 'published'
-                    ? 'border-blue bg-blue/10 text-blue shadow-[0_0_20px_rgba(0,180,255,0.15)]'
+                    ? 'border-blue bg-blue/10 text-blue'
                     : 'border-blue/20 text-gray-400 hover:border-blue/50 hover:text-white'
                 }`}
               >
@@ -550,7 +550,7 @@ export default function UserProfile() {
                 onClick={() => setActivePostFilter('draft')}
                 className={`rounded-full border px-5 py-2 text-sm font-mono uppercase tracking-[0.2em] transition-all ${
                   activePostFilter === 'draft'
-                    ? 'border-amber-300/50 bg-amber-300/10 text-amber-200 shadow-[0_0_20px_rgba(252,211,77,0.12)]'
+                    ? 'border-amber-300/50 bg-amber-300/10 text-amber-200'
                     : 'border-blue/20 text-gray-400 hover:border-blue/50 hover:text-white'
                 }`}
               >

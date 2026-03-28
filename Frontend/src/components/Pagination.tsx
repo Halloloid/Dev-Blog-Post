@@ -1,4 +1,11 @@
-export function Pagination({ currentPage = 1, totalPage = 12, onHandleNext, onHandlePrevious }) {
+interface PaginationProps {
+  currentPage?: number;
+  totalPage?: number;
+  onHandleNext?: (page: number) => void;
+  onHandlePrevious?: (page: number) => void;
+}
+
+export function Pagination({ currentPage = 1, totalPage = 12, onHandleNext, onHandlePrevious }: PaginationProps) {
   const isFirst = currentPage === 1;
   const isLast = currentPage === totalPage;
 
@@ -6,15 +13,6 @@ export function Pagination({ currentPage = 1, totalPage = 12, onHandleNext, onHa
     <div style={{ fontFamily: "'DM Sans', sans-serif" }} className="relative inline-flex items-center">
 
       {/* Ambient glow — subtle, not overwhelming */}
-      <div className="absolute inset-0 rounded-2xl"
-        style={{
-          background: "radial-gradient(ellipse at 50% 120%, rgba(168,85,247,0.18) 0%, transparent 70%)",
-          filter: "blur(12px)",
-          transform: "translateY(4px) scaleX(0.9)",
-        }}
-      />
-
-      {/* Main pill container */}
       <div
         className="relative flex items-center"
         style={{
@@ -23,7 +21,6 @@ export function Pagination({ currentPage = 1, totalPage = 12, onHandleNext, onHa
           borderRadius: "16px",
           padding: "6px",
           gap: "2px",
-          boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 32px rgba(0,0,0,0.4)",
           backdropFilter: "blur(20px)",
         }}
       >
@@ -107,11 +104,10 @@ export function Pagination({ currentPage = 1, totalPage = 12, onHandleNext, onHa
             letterSpacing: "0.01em",
             padding: "8px 16px",
             transition: "all 0.15s ease",
-            boxShadow: isLast ? "none" : "0 2px 12px rgba(168,85,247,0.35), 0 1px 0 rgba(255,255,255,0.12) inset",
             whiteSpace: "nowrap",
           }}
-          onMouseEnter={e => { if (!isLast) { e.currentTarget.style.boxShadow = "0 4px 20px rgba(168,85,247,0.55), 0 1px 0 rgba(255,255,255,0.15) inset"; e.currentTarget.style.transform = "translateY(-1px)"; }}}
-          onMouseLeave={e => { if (!isLast) { e.currentTarget.style.boxShadow = "0 2px 12px rgba(168,85,247,0.35), 0 1px 0 rgba(255,255,255,0.12) inset"; e.currentTarget.style.transform = "translateY(0)"; }}}
+          onMouseEnter={e => { if (!isLast) { e.currentTarget.style.transform = "translateY(-1px)"; }}}
+          onMouseLeave={e => { if (!isLast) { e.currentTarget.style.transform = "translateY(0)"; }}}
         >
           Next
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

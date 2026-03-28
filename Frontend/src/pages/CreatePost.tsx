@@ -396,8 +396,8 @@ function CreatePost() {
                   onChange={handleInputChange}
                   placeholder="Enter post title..."
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.title
-                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-700 focus:border-land'
                     }`}
                 />
                 {errors.title && (
@@ -419,8 +419,8 @@ function CreatePost() {
                   placeholder="Brief summary of your post..."
                   rows={2}
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono resize-none ${errors.excerpt
-                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-700 focus:border-land'
                     }`}
                 />
                 {errors.excerpt && (
@@ -442,8 +442,8 @@ function CreatePost() {
                   placeholder="Write your content in markdown... (supports code blocks with ```typescript)"
                   rows={15}
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono resize-none ${errors.content
-                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-700 focus:border-land'
                     }`}
                 />
                 {errors.content && (
@@ -485,12 +485,12 @@ function CreatePost() {
                     placeholder="Start typing a tag and press Enter"
                     disabled={formData.tags.length >= 5}
                     className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.tags
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-700 focus:border-land'
                       }`}
                   />
                   {showSuggestions && suggestions.length > 0 && formData.tags.length < 5 && (
-                    <div className="absolute z-10 mt-2 w-full rounded-lg border border-gray-700 bg-[#0d0d0d] shadow-[0_0_20px_rgba(0,0,0,0.4)]">
+                    <div className="absolute z-10 mt-2 w-full rounded-lg border border-gray-700 bg-[#0d0d0d]">
                       {suggestions.map((tag) => (
                         <button
                           key={tag.id}
@@ -517,7 +517,7 @@ function CreatePost() {
                   {formData.tags.map((tag) => (
                     <span
                       key={tag.id}
-                      className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono border border-land text-land rounded-full shadow-[0_0_10px_rgba(44,255,5,0.2)]"
+                      className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono border border-land text-land rounded-full"
                     >
                       {tag.name}
                       <button
@@ -544,8 +544,8 @@ function CreatePost() {
                   onChange={handleInputChange}
                   placeholder="https://github.com/username/repo-name"
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${errors.repoLink
-                    ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                    : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-700 focus:border-land'
                     }`}
                 />
                 {errors.repoLink && (
@@ -649,7 +649,7 @@ function CreatePost() {
               <div className="flex gap-3">
                 <button
                   onClick={handlePublish}
-                  className="flex-1 px-8 py-3 bg-land text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono"
+                  className="flex-1 px-8 py-3 bg-land text-black font-bold rounded-lg transition-all font-mono"
                 >
                   {isDraftMode
                     ? formData.status === 'published'
@@ -684,7 +684,7 @@ function CreatePost() {
                     </div>
                   )}
 
-                  <h1 className="text-5xl font-bold mb-6 text-land drop-shadow-[0_0_20px_rgba(44,255,5,0.5)]">
+                  <h1 className="text-5xl font-bold mb-6 text-land">
                     {formData.title || 'Your Post Title'}
                   </h1>
 
@@ -707,7 +707,6 @@ function CreatePost() {
                                 'pre[class*="language-"]': {
                                   background: '#0d0d0d',
                                   border: '1px solid #2CFF05',
-                                  boxShadow: '0 0 20px rgba(44, 255, 5, 0.1)',
                                 },
                               }}
                               language={match[1]}
@@ -718,7 +717,6 @@ function CreatePost() {
                                 borderRadius: '8px',
                                 padding: '1.5rem',
                                 fontSize: '0.9rem',
-                                boxShadow: '0 0 20px rgba(44, 255, 5, 0.1)',
                               }}
                               {...props}
                             >
@@ -731,12 +729,12 @@ function CreatePost() {
                           );
                         },
                         h1: ({ children }) => (
-                          <h1 className="text-4xl font-bold mt-12 mb-6 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
+                          <h1 className="text-4xl font-bold mt-12 mb-6 text-land">
                             {children}
                           </h1>
                         ),
                         h2: ({ children }) => (
-                          <h2 className="text-3xl font-bold mt-10 mb-5 text-vio drop-shadow-[0_0_10px_rgba(255,0,255,0.3)]">
+                          <h2 className="text-3xl font-bold mt-10 mb-5 text-vio">
                             {children}
                           </h2>
                         ),
@@ -782,7 +780,7 @@ function CreatePost() {
                           <span
                             key={tag.id}
                             className={`px-3 py-1 text-xs font-mono border rounded-full ${index % 2 === 0
-                              ? 'border-land text-land shadow-[0_0_10px_rgba(44,255,5,0.3)]'
+                              ? 'border-land text-land'
                               : 'border-white text-white'
                               }`}
                           >

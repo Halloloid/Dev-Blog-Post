@@ -2,17 +2,12 @@ import Card from "@/components/Card"
 import { Pagination } from "@/components/Pagination"
 import SearchBar from "@/components/SearchBar"
 import { Highlighter } from "@/components/ui/highlighter"
-import { RainbowButton } from "@/components/ui/rainbow-button"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar"
 import api from "@/config/api"
 import { useEffect, useRef, useState } from "react"
 import { type CardProps } from "@/components/Card"
 import { X } from "lucide-react"
-import { HyperText } from "@/components/ui/hyper-text"
-import { RippleButton } from "@/components/ui/ripple-button"
-import { Plus } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 
 export type Tag = {
   id: string,
@@ -29,39 +24,11 @@ const Home = () => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTag, setSelecetdTag] = useState("");
   const [sortBy, setSortBy] = useState<string>("created_at");
-  const [user, setUser] = useState<any>(null);
   const [posts, setposts] = useState<CardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(10);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const cardsRef = useRef<HTMLDivElement | null>(null);
-
-  const navigate = useNavigate()
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await api.get("/auth/me", {
-          withCredentials: true
-        });
-        setUser(res.data);
-
-      } catch (error) {
-        setUser(null);
-      }
-    };
-
-    checkAuth();
-
-    const handleUsernameCreated = () => {
-      checkAuth();
-    };
-
-    window.addEventListener("username-created", handleUsernameCreated);
-
-    return () => {
-      window.removeEventListener("username-created", handleUsernameCreated);
-    };
-  }, []);
   useEffect(() => {
     setLoading(true);
     setProgress(10);
@@ -115,10 +82,6 @@ const Home = () => {
     }
   };
 
-  const onAuthorClick = async (user_name: string) => {
-    navigate(`/profile/${user_name}`)
-  }
-
   const handleMostLiked = () => {
     setcurrentPage(1);
     setSortBy("likes_count");
@@ -169,40 +132,6 @@ const Home = () => {
           </div>
         </div>
       )}
-
-      {/* Navbar */}
-      <nav className="w-full h-18 bg-black/50 backdrop-blur-md border-b border-fuchsia-500/30 px-8 shadow-[0_4px_20px_rgba(217,70,239,0.3)] flex items-center justify-between sticky top-0 z-50">
-        <HyperText className="text-2xl">Dev_Blog</HyperText>
-
-        <div className="flex gap-8">
-          {user?.user_name ? (
-            <RippleButton onClick={() => navigate(`/createpost/${user.user_name}`)}>
-              <Plus size={16} className="mt-0.5" />
-              Create Post
-            </RippleButton>
-          ) : (
-            <RippleButton disabled>
-              <Plus size={16} className="mt-0.5" />
-              Create Post
-            </RippleButton>
-          )}
-          {user ? (
-            <RainbowButton
-              size="icon"
-              onClick={() => user.user_name && onAuthorClick(user.user_name)}
-              disabled={!user.user_name}
-            >
-              <img
-                src={user.avatar_url}
-                className="rounded-3xl p-0.5"
-                referrerPolicy="no-referrer"
-              />
-            </RainbowButton>
-          ) : (
-            <RainbowButton size="default" onClick={() => window.location.href = "https://dev-blog-post.onrender.com/auth/google"}>Login</RainbowButton>
-          )}
-        </div>
-      </nav>
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -268,7 +197,7 @@ const Home = () => {
 
           {/* Tags Sidebar */}
           <aside className="lg:col-span-1 order-2 lg:order-1">
-            <div className="rounded-2xl bg-white/3 border border-fuchsia-500/30 shadow-[0_0_30px_rgba(217,70,239,0.15)] p-6 sticky top-24 h-fit">
+            <div className="rounded-2xl bg-white/3 border border-fuchsia-500/30 p-6 sticky top-24 h-fit">
               <div className="text-2xl font-bold text-center mb-6">
                 <Highlighter action="underline" color="#FF00FF">
                   <span className="text-fuchsia-400">Tags</span>
@@ -282,8 +211,8 @@ const Home = () => {
                       key={tag.id}
                       className={`w-full py-2.5 px-4 rounded-lg border text-sm font-medium transition-all duration-200 cursor-pointer text-left
                         ${selectedTag === tag.slug
-                          ? "bg-fuchsia-500/30 border-fuchsia-400 text-white shadow-[0_0_12px_rgba(217,70,239,0.6)]"
-                          : "border-fuchsia-500/40 text-fuchsia-300 bg-fuchsia-500/5 hover:bg-fuchsia-500/20 hover:border-fuchsia-400 hover:text-white hover:shadow-[0_0_12px_rgba(217,70,239,0.4)]"
+                          ? "bg-fuchsia-500/30 border-fuchsia-400 text-white"
+                          : "border-fuchsia-500/40 text-fuchsia-300 bg-fuchsia-500/5 hover:bg-fuchsia-500/20 hover:border-fuchsia-400 hover:text-white"
                         }`}
                       onClick={() => handleSlectedTag(tag.slug)}
                     >

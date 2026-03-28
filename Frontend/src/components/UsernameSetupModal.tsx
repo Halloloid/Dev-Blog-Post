@@ -56,7 +56,7 @@ function UsernameSetupModal({ onSuccess }: UsernameSetupModalProps) {
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-fuchsia-500/30 bg-[#09040d] p-6 shadow-[0_0_40px_rgba(217,70,239,0.18)]">
+      <div className="w-full max-w-md rounded-2xl border border-fuchsia-500/30 bg-[#09040d] p-6">
         <div className="mb-5">
           <p className="text-xs uppercase tracking-[0.35em] text-fuchsia-300/70">
             One More Step

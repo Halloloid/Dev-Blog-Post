@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import Home from "./pages/Home"
 import Landing from "./pages/Landing"
 import PostView from "./pages/PostView"
@@ -10,6 +10,7 @@ import CreatePost from "./pages/CreatePost"
 import UpdatePost from "./pages/UpdatePost"
 import api from "./config/api"
 import UsernameSetupModal from "./components/UsernameSetupModal"
+import AppNavbar from "./components/AppNavbar"
 
 type AuthUser = {
   id: string;
@@ -21,6 +22,8 @@ type AuthUser = {
 const App = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const location = useLocation();
+  const showNavbar = location.pathname !== "/";
 
   useEffect(() => {
     let isMounted = true;
@@ -58,6 +61,7 @@ const App = () => {
           }}
         />
       )}
+      {showNavbar && <AppNavbar user={authUser} />}
       <Routes>
         <Route path="/" element={<Landing/>} />
         <Route path="/home" element={<Home/>}/>

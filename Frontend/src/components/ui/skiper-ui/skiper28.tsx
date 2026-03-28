@@ -1,6 +1,5 @@
 "use client";
 
-import { LiquidButton } from "@/components/animate-ui/components/buttons/liquid";
 import {
   motion,
   useMotionTemplate,
@@ -8,7 +7,7 @@ import {
   useTransform,
 } from "framer-motion";
 import ReactLenis from "lenis/react";
-import React, { useRef } from "react";
+import { useRef } from "react";
 
 const Skiper28 = () => {
   const targetRef = useRef<HTMLDivElement | null>(null);

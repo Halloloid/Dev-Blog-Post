@@ -553,8 +553,8 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
               <span
                 key={tag.id}
                 className={`px-3 py-1 text-xs font-mono border rounded-full ${index % 2 === 0
-                    ? 'border-land text-land shadow-[0_0_10px_rgba(44,255,5,0.3)]'
-                    : 'border-vio text-vio shadow-[0_0_10px_rgba(255,0,255,0.3)]'
+                    ? 'border-land text-land'
+                    : 'border-vio text-vio'
                   }`}
               >
                 {tag.name}
@@ -562,7 +562,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
             ))}
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-land drop-shadow-[0_0_20px_rgba(44,255,5,0.5)]">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-land">
             {post.title}
           </h1>
 
@@ -597,7 +597,6 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                       'pre[class*="language-"]': {
                         background: '#0d0d0d',
                         border: '1px solid #2CFF05',
-                        boxShadow: '0 0 20px rgba(44, 255, 5, 0.1)',
                       },
                     }}
                     language={match[1]}
@@ -608,7 +607,6 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                       borderRadius: '8px',
                       padding: '1.5rem',
                       fontSize: '0.9rem',
-                      boxShadow: '0 0 20px rgba(44, 255, 5, 0.1)',
                     }}
                     {...props}
                   >
@@ -621,12 +619,12 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                 );
               },
               h1: ({ children }) => (
-                <h1 className="text-4xl font-bold mt-12 mb-6 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
+                <h1 className="text-4xl font-bold mt-12 mb-6 text-land">
                   {children}
                 </h1>
               ),
               h2: ({ children }) => (
-                <h2 className="text-3xl font-bold mt-10 mb-5 text-vio drop-shadow-[0_0_10px_rgba(255,0,255,0.3)]">
+                <h2 className="text-3xl font-bold mt-10 mb-5 text-vio">
                   {children}
                 </h2>
               ),
@@ -669,7 +667,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                 onClick={handleLike}
                 disabled={isLiking || !currentUserId}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all disabled:opacity-60 disabled:cursor-not-allowed ${liked
-                    ? 'border-vio text-vio bg-vio/10 shadow-[0_0_20px_rgba(255,0,255,0.3)]'
+                    ? 'border-vio text-vio bg-vio/10'
                     : 'border-gray-700 text-gray-400 hover:border-vio hover:text-vio'
                   }`}
               >
@@ -692,7 +690,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
               href={post.repo_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg border border-land text-land hover:bg-land/10 transition-all shadow-[0_0_10px_rgba(44,255,5,0.2)] hover:shadow-[0_0_20px_rgba(44,255,5,0.4)]"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg border border-land text-land hover:bg-land/10 transition-all"
             >
               <Github size={20} />
               <span className="font-mono">View Repo</span>
@@ -740,7 +738,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
           </div>
         </div>
         <div className="mt-16">
-          <h2 className="text-3xl font-bold mb-8 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
+          <h2 className="text-3xl font-bold mb-8 text-land">
             Comments ({post.comments_count})
           </h2>
 
@@ -761,14 +759,14 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Share your thoughts..."
-              className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)] transition-all resize-none font-mono"
+              className="w-full bg-[#0d0d0d] border border-gray-700 rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-land transition-all resize-none font-mono"
               rows={4}
               disabled={isPostingComment}
             />
 
             <button
               type="submit"
-              className="mt-4 px-8 py-3 bg-land text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(44,255,5,0.5)] transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+              className="mt-4 px-8 py-3 bg-land text-black font-bold rounded-lg transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
               disabled={isPostingComment || !comment.trim()}
             >
               {isPostingComment ? 'Posting...' : 'Post Comment'}

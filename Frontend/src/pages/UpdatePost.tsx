@@ -315,8 +315,8 @@ function UpdatePost() {
                   placeholder="Enter post title..."
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${
                     errors.title
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-700 focus:border-land'
                   }`}
                 />
                 {errors.title && (
@@ -339,8 +339,8 @@ function UpdatePost() {
                   rows={2}
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono resize-none ${
                     errors.excerpt
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-700 focus:border-land'
                   }`}
                 />
                 {errors.excerpt && (
@@ -363,8 +363,8 @@ function UpdatePost() {
                   rows={15}
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono resize-none ${
                     errors.content
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-700 focus:border-land'
                   }`}
                 />
                 {errors.content && (
@@ -387,8 +387,8 @@ function UpdatePost() {
                   placeholder="https://github.com/username/repo-name"
                   className={`w-full bg-[#0d0d0d] border rounded-lg p-4 text-gray-300 placeholder-gray-600 focus:outline-none transition-all font-mono ${
                     errors.repoLink
-                      ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]'
-                      : 'border-gray-700 focus:border-land focus:shadow-[0_0_10px_rgba(44,255,5,0.2)]'
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-700 focus:border-land'
                   }`}
                 />
                 {errors.repoLink && (
@@ -407,7 +407,7 @@ function UpdatePost() {
                   className={`flex-1 px-8 py-3 font-bold rounded-lg transition-all font-mono ${
                     !hasChanges || isSubmitting
                       ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                      : 'bg-land text-black hover:shadow-[0_0_20px_rgba(44,255,5,0.5)]'
+                      : 'bg-land text-black'
                   }`}
                 >
                   {isSubmitting ? 'Saving...' : 'Save Changes'}
@@ -427,7 +427,7 @@ function UpdatePost() {
             <div className="lg:col-span-3">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
-                  <h1 className="text-5xl font-bold mb-6 text-land drop-shadow-[0_0_20px_rgba(44,255,5,0.5)]">
+                  <h1 className="text-5xl font-bold mb-6 text-land">
                     {formData.title || 'Your Post Title'}
                   </h1>
 
@@ -448,7 +448,6 @@ function UpdatePost() {
                                 'pre[class*="language-"]': {
                                   background: '#0d0d0d',
                                   border: '1px solid #2CFF05',
-                                  boxShadow: '0 0 20px rgba(44, 255, 5, 0.1)',
                                 },
                               }}
                               language={match[1]}
@@ -459,7 +458,6 @@ function UpdatePost() {
                                 borderRadius: '8px',
                                 padding: '1.5rem',
                                 fontSize: '0.9rem',
-                                boxShadow: '0 0 20px rgba(44, 255, 5, 0.1)',
                               }}
                               {...props}
                             >
@@ -472,12 +470,12 @@ function UpdatePost() {
                           );
                         },
                         h1: ({ children }) => (
-                          <h1 className="text-4xl font-bold mt-12 mb-6 text-land drop-shadow-[0_0_10px_rgba(44,255,5,0.3)]">
+                          <h1 className="text-4xl font-bold mt-12 mb-6 text-land">
                             {children}
                           </h1>
                         ),
                         h2: ({ children }) => (
-                          <h2 className="text-3xl font-bold mt-10 mb-5 text-vio drop-shadow-[0_0_10px_rgba(255,0,255,0.3)]">
+                          <h2 className="text-3xl font-bold mt-10 mb-5 text-vio">
                             {children}
                           </h2>
                         ),

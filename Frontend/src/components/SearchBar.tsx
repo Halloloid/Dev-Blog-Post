@@ -70,20 +70,17 @@ const SearchBar = ({ value, onChange, onSubmit }:SearchBarProps) => {
             }
           }}
           placeholder="Search..."
-          className="w-full h-12 pl-12 pr-4 rounded-xl border bg-background text-base outline-none transition-all duration-200 shadow-sm"
+          className="w-full h-12 pl-12 pr-4 rounded-xl border bg-background text-base outline-none transition-all duration-200"
           style={{
             color: "#FFFFFF",
             borderColor:"#FF00FF",
-            boxShadow: isFocused
-              ? "0 0 0 3px rgba(255, 0, 255, 0.15), 0 4px 12px rgba(0,0,0,0.05)"
-              : "0 1px 4px rgba(0,0,0,0.04)",
           }}
         />
       </div>
 
       {showDropdown && (
         <ul
-          className="absolute z-50 mt-2 w-full rounded-xl border bg-black shadow-lg overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
+          className="absolute z-50 mt-2 w-full rounded-xl border bg-black overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
         >
           {filtered.map((item) => (
             <li

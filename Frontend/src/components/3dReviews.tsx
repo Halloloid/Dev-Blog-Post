@@ -59,7 +59,7 @@ const ReviewCard = ({
       className={cn(
         "relative h-full w-64 cursor-pointer overflow-hidden rounded-2xl p-3 backdrop-blur-xl",
         "bg-black border border-white/10  transition-all duration-300",
-        "hover:border-white/30 hover:shadow-[0_0_20px_rgba(50,205,50,0.3)]"
+        "hover:border-white/30"
       )}
     >
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent"></div>
