@@ -48,6 +48,14 @@ export const addComment = async(req:Request,res:Response) => {
             }
         })
 
+        await prisma.post.update({
+            where:{
+                id:postId
+            },
+            data:{
+                comments_count:{increment:1}
+            }
+        })
         //redis cache invalidation
         try {
             await redis.del(`post:${postId}`)
@@ -84,7 +92,8 @@ export const updateComment = async(req:Request,res:Response) => {
         const existingComment = await prisma.comment.findFirst({
             where:{
                 id:commentId,
-                user_id:user.sub
+                user_id:user.sub,
+                parent_comment_id:null
             },
             select:{
                 id:true,
@@ -124,7 +133,8 @@ export const deleteComment = async(req:Request,res:Response) => {
         const existingComment = await prisma.comment.findFirst({
             where:{
                 id:commentId,
-                user_id:user.sub
+                user_id:user.sub,
+                parent_comment_id:null
             },
             select:{
                 id:true,
@@ -138,6 +148,12 @@ export const deleteComment = async(req:Request,res:Response) => {
             where:{id:existingComment.id},
         })
 
+        await prisma.post.update({
+            where:{id:existingComment.post_id},
+            data:{
+                comments_count:{decrement:1}
+            }
+        })
         //redis cache invalidation
         try {
             await redis.del(`post:${existingComment.post_id}`)
