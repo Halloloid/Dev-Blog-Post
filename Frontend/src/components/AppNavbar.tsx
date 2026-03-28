@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { HyperText } from "@/components/ui/hyper-text";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { House, Plus } from "lucide-react";
@@ -8,10 +9,13 @@ type AppNavbarProps = {
     avatar_url: string;
     user_name: string | null;
   } | null;
+  onHeightChange?: (height: number) => void;
 };
 
-function AppNavbar({ user }: AppNavbarProps) {
+function AppNavbar({ user, onHeightChange }: AppNavbarProps) {
   const navigate = useNavigate();
+  const navRef = useRef<HTMLElement | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
 
   const navButtonClassName =
     "group inline-flex h-11 items-center gap-2 rounded-full border px-5 text-[0.95rem] font-bold leading-none transition-all";
@@ -22,8 +26,52 @@ function AppNavbar({ user }: AppNavbarProps) {
   const disabledButtonClassName =
     `${navButtonClassName} border-white/10 bg-white/5 text-white/35 cursor-not-allowed`;
 
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
+
+      if (currentScrollY <= 12) {
+        setIsVisible(true);
+      } else if (delta > 6) {
+        setIsVisible(false);
+      } else if (delta < -6) {
+        setIsVisible(true);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const element = navRef.current;
+    if (!element || !onHeightChange) return;
+
+    const updateHeight = () => {
+      onHeightChange(element.getBoundingClientRect().height);
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [onHeightChange]);
+
   return (
-    <nav className="w-full min-h-18 bg-black/65 backdrop-blur-md border-b border-fuchsia-500/30 px-5 sm:px-8 py-3 flex items-center justify-between gap-4">
+    <nav
+      ref={navRef}
+      className={`fixed inset-x-0 top-0 z-[120] w-full min-h-18 border-b border-fuchsia-500/30 bg-black/65 px-5 py-3 backdrop-blur-md transition-transform duration-300 ease-out sm:px-8 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
+    >
+      <div className="flex items-center justify-between gap-4">
       <button
         type="button"
         onClick={() => navigate("/home")}
@@ -84,6 +132,7 @@ function AppNavbar({ user }: AppNavbarProps) {
             Login
           </RainbowButton>
         )}
+      </div>
       </div>
     </nav>
   );

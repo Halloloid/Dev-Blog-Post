@@ -197,7 +197,7 @@ const Home = () => {
 
           {/* Tags Sidebar */}
           <aside className="lg:col-span-1 order-2 lg:order-1">
-            <div className="rounded-2xl bg-white/3 border border-fuchsia-500/30 p-6 sticky top-24 h-fit">
+            <div className="rounded-2xl bg-white/3 border border-fuchsia-500/30 p-6 sticky top-[calc(var(--app-navbar-height,0px)+1.5rem)] h-fit">
               <div className="text-2xl font-bold text-center mb-6">
                 <Highlighter action="underline" color="#FF00FF">
                   <span className="text-fuchsia-400">Tags</span>

@@ -232,7 +232,7 @@ function UpdatePost() {
   if (!initialFormData) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-gray-100">
-        <div className="sticky top-0 z-50 bg-[#0a0a0a] border-b border-gray-800">
+        <div className="sticky top-[var(--app-navbar-height,0px)] z-50 bg-[#0a0a0a] border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-land">Edit Post</h1>
             <button
@@ -257,7 +257,7 @@ function UpdatePost() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100">
-      <div className="sticky top-0 z-50 bg-[#0a0a0a] border-b border-gray-800">
+      <div className="sticky top-[var(--app-navbar-height,0px)] z-50 bg-[#0a0a0a] border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-land">Edit Post</h1>
@@ -513,7 +513,7 @@ function UpdatePost() {
                 </div>
 
                 <div className="border-l border-gray-800 pl-8">
-                  <div className="sticky top-24 space-y-6">
+                  <div className="sticky top-[calc(var(--app-navbar-height,0px)+1.5rem)] space-y-6">
                     <div>
                       <h3 className="text-sm font-bold text-land mb-3 font-mono">EXCERPT</h3>
                       <p className="text-sm text-gray-300 leading-relaxed">

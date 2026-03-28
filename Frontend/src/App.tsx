@@ -22,6 +22,7 @@ type AuthUser = {
 const App = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [navbarHeight, setNavbarHeight] = useState(0);
   const location = useLocation();
   const showNavbar = location.pathname !== "/";
 
@@ -51,7 +52,7 @@ const App = () => {
   }, []);
 
   return (
-    <>
+    <div style={{ ["--app-navbar-height" as string]: `${showNavbar ? navbarHeight : 0}px` }}>
       {showUsernameModal && authUser && (
         <UsernameSetupModal
           onSuccess={(username) => {
@@ -61,7 +62,8 @@ const App = () => {
           }}
         />
       )}
-      {showNavbar && <AppNavbar user={authUser} />}
+      {showNavbar && <AppNavbar user={authUser} onHeightChange={setNavbarHeight} />}
+      {showNavbar && <div aria-hidden="true" style={{ height: navbarHeight }} />}
       <Routes>
         <Route path="/" element={<Landing/>} />
         <Route path="/home" element={<Home/>}/>
@@ -72,7 +74,7 @@ const App = () => {
         <Route path="/createpost/:username" element={<CreatePost/>}/>
         <Route path="/profile/:username/posts/:id/edit" element={<UpdatePost/>}/>
       </Routes>
-    </>
+    </div>
   )
 }
 
