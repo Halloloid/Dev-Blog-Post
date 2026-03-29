@@ -25,13 +25,17 @@ export const RadixHoverCardDemo = ({
     <HoverCard followCursor={followCursor}>
       <HoverCardTrigger asChild>
         <a
-          className="size-12 overflow-hidden rounded-full border border-eggshell/35 shadow-[0_10px_25px_rgba(0,0,0,0.16)] transition-transform duration-300 hover:scale-[1.03] sm:size-14"
+          className="inline-flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-eggshell/35 shadow-[0_10px_25px_rgba(0,0,0,0.16)] transition-transform duration-300 hover:scale-[1.03] sm:size-14"
           href="https://github.com/Halloloid"
           target="_blank"
           rel="noreferrer noopener"
           aria-label="Open Halloloid on GitHub"
         >
-          <img src={avatarUrl} alt="Halloloid avatar" width="100%" />
+          <img
+            className="block size-full object-cover object-center"
+            src={avatarUrl}
+            alt="Halloloid avatar"
+          />
         </a>
       </HoverCardTrigger>
 
@@ -45,7 +49,7 @@ export const RadixHoverCardDemo = ({
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <img
-              className="size-14 overflow-hidden rounded-full border border-gray-600 sm:size-16"
+              className="size-14 shrink-0 overflow-hidden rounded-full border border-gray-600 object-cover object-center sm:size-16"
               src={avatarUrl}
               alt="Halloloid avatar"
             />

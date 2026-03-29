@@ -36,34 +36,19 @@ const Skiper28 = () => {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(205,70,49,0.12),transparent_36%),linear-gradient(180deg,rgba(248,242,220,1)_0%,rgba(248,242,220,0.96)_100%)]" />
 
-      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:px-6 sm:pb-14 sm:pt-18 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-14 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.34em] text-toffeebrown/55">
-            Why This Works
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-toffeebrown/55 sm:tracking-[0.34em]">
+            scroll
           </p>
-          <h2 className="mt-3 text-[clamp(2.25rem,8vw,5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em]">
-            The landing page keeps its voice, even on a phone.
+          <h2 className="mt-3 text-[clamp(1.9rem,9vw,5rem)] font-black uppercase leading-[0.94] tracking-[-0.035em] sm:leading-[0.9] sm:tracking-[-0.05em]">
+            Scroll down
           </h2>
-          <p className="mt-4 text-sm leading-7 text-toffeebrown/80 sm:text-base">
-            The scroll section still has depth and movement, but it now scales with the viewport
-            instead of assuming a giant desktop canvas.
-          </p>
-        </div>
-
-        <div className="mt-6 flex flex-wrap justify-center gap-2 sm:mt-8">
-          {storyTags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-toffeebrown/20 bg-rossycopper/8 px-4 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-toffeebrown/80"
-            >
-              {tag}
-            </span>
-          ))}
         </div>
       </div>
 
-      <div className="relative h-[160vh] sm:h-[190vh] lg:h-[220vh]">
-        <div className="sticky top-0 flex min-h-screen items-center px-4 py-10 sm:px-6 lg:px-8">
+      <div className="relative block h-[75vh] lg:h-[150vh]">
+        <div className="sticky top-0 flex min-h-[70vh] sm:min-h-[75vh] items-center px-4 py-8 sm:px-6 lg:px-8">
           <motion.div
             style={{
               transform,
@@ -78,10 +63,6 @@ const Skiper28 = () => {
                     {line}
                   </span>
                 ))}
-              </p>
-              <p className="mx-auto max-w-3xl text-sm leading-7 text-toffeebrown/78 sm:text-base">
-                A calmer mobile height, fluid widths, and responsive type keep the movement readable
-                instead of overwhelming the page.
               </p>
             </div>
           </motion.div>
