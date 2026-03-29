@@ -7,7 +7,19 @@
 @theme{
   --color-land:#2CFF05;
   --color-vio: #FF00FF;
-  --color-blue:#2323FF
+  --color-blue:#2323FF;
+  /* --color-navy-900:#00101E;
+  --color-navy-800:#000C48;
+  --color-navy-700:#000D52;
+  --color-blue-500:#4158D1;
+  --color-purple-600:#5E34BD;
+  --color-purple-500:#6F4AC2;
+  --color-purple-300:#B875FB; */
+  --color-toffeebrown:#9E6240;
+  --color-lightbronze:#DEA47E;
+  --color-rossycopper:#CD4631;
+  --color-eggshell:#F8F2DC;
+  --color-skyreflection:#81ADC8;
 }
 
 @theme inline {
@@ -202,8 +214,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
-    @apply text-foreground bg-black;
+    @apply bg-black text-foreground overflow-x-hidden;
   }
 }
 
@@ -226,4 +241,4 @@
   * {
     @apply border-border outline-ring/50;}
   body {
-    @apply bg-background text-foreground;}}
+    @apply bg-background text-foreground overflow-x-hidden;}}

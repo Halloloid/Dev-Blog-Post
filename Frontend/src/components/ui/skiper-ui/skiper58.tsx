@@ -3,75 +3,93 @@
 import { motion } from "framer-motion";
 import React from "react";
 import { cn } from "@/lib/utils";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom";
 
 const navigationItems = [
   {
     name: "Home",
     href: "/home",
     description: "[0]",
+    kind: "route",
   },
   {
-    name: "Components",
-    href: "/components",
+    name: "Reviews",
+    href: "#reviews",
     description: "[1]",
+    kind: "anchor",
   },
   {
-    name: "Pricing",
-    href: "/pricing",
+    name: "Story",
+    href: "#story",
     description: "[2]",
+    kind: "anchor",
   },
   {
-    name: "How to use",
-    href: "/docs/quick-start",
+    name: "Creator",
+    href: "https://github.com/Halloloid",
     description: "[3]",
-  },
-  {
-    name: "Account",
-    href: "/user",
-    description: "[4]",
+    kind: "external",
   },
   {
     name: "Login",
     href: "https://dev-blog-post.onrender.com/auth/google",
-    description: "[7]",
-    external:true
+    description: "[4]",
+    kind: "external",
   },
-];
+] as const;
 
 export const Skiper58 = () => {
   return (
-    <ul className="bs flex w-full flex-1 flex-col gap-1.5 rounded-2xl px-7 py-3 backdrop-blur-sm">
-      {navigationItems.map((item, index) => (
-        <li
-          className="relative flex cursor-pointer flex-col overflow-visible"
-          key={index}
-        >
-          <div className="relative flex items-start">
-  {item.external ? (
-    <a href={item.href}>
-      <TextRoll
-        center
-        className="text-4xl font-extrabold uppercase leading-[0.8] tracking-[-0.03em] transition-colors lg:text-5xl"
-      >
-        {item.name}
-      </TextRoll>
-    </a>
-  ) : (
-    <Link to={item.href}>
-      <TextRoll
-        center
-        className="text-4xl font-extrabold uppercase leading-[0.8] tracking-[-0.03em] transition-colors lg:text-5xl"
-      >
-        {item.name}
-      </TextRoll>
-    </Link>
-  )}
-</div>
+    <nav className="rounded-[2rem] border border-eggshell/20 bg-black/10 p-5 text-eggshell shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:p-6">
+      <div className="mb-5 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.34em] text-eggshell/60">
+          Explore
+        </p>
+        <p className="max-w-sm text-sm leading-6 text-eggshell/75">
+          Quick entry points for the landing page, the blog feed, and the creator link.
+        </p>
+      </div>
 
-        </li>
-      ))}
-    </ul>
+      <ul className="flex w-full flex-1 flex-col gap-2">
+        {navigationItems.map((item, index) => (
+          <li className="relative flex flex-col overflow-visible" key={index}>
+            {item.kind === "route" ? (
+              <Link
+                to={item.href}
+                className="group flex items-center justify-between gap-4 rounded-[1.4rem] border border-eggshell/12 bg-eggshell/8 px-4 py-4 transition-colors hover:border-eggshell/30 hover:bg-eggshell/12 sm:px-5"
+              >
+                <TextRoll
+                  center
+                  className="text-[clamp(2rem,9vw,4.1rem)] font-extrabold uppercase leading-[0.84] tracking-[-0.05em] text-eggshell transition-colors"
+                >
+                  {item.name}
+                </TextRoll>
+                <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-eggshell/50 sm:text-xs">
+                  {item.description}
+                </span>
+              </Link>
+            ) : (
+              <a
+                href={item.href}
+                target={item.kind === "external" ? "_blank" : undefined}
+                rel={item.kind === "external" ? "noreferrer noopener" : undefined}
+                className="group flex items-center justify-between gap-4 rounded-[1.4rem] border border-eggshell/12 bg-eggshell/8 px-4 py-4 transition-colors hover:border-eggshell/30 hover:bg-eggshell/12 sm:px-5"
+              >
+                <TextRoll
+                  center
+                  className="text-[clamp(2rem,9vw,4.1rem)] font-extrabold uppercase leading-[0.84] tracking-[-0.05em] text-eggshell transition-colors"
+                >
+                  {item.name}
+                </TextRoll>
+                <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-eggshell/50 sm:text-xs">
+                  {item.description}
+                </span>
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 };
 
@@ -88,7 +106,7 @@ const TextRoll: React.FC<{
       whileHover="hovered"
       className={cn("relative block overflow-hidden", className)}
       style={{
-        lineHeight: 0.75,
+        lineHeight: 0.82,
       }}
     >
       <div>

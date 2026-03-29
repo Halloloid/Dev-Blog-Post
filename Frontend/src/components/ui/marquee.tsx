@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef } from "react"
+import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -20,7 +20,7 @@ interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
   /**
    * Content to be displayed in the marquee
    */
-  children: React.ReactNode
+  children: ReactNode
   /**
    * Whether to animate vertically instead of horizontally
    * @default false

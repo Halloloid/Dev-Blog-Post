@@ -4,6 +4,8 @@ import {
   HoverCardContent,
 } from '@/components/animate-ui/components/radix/hover-card';
 
+const avatarUrl = 'https://avatars.githubusercontent.com/u/199330005?v=4';
+
 interface RadixHoverCardDemoProps {
   side?: 'top' | 'bottom' | 'left' | 'right';
   sideOffset?: number;
@@ -23,16 +25,13 @@ export const RadixHoverCardDemo = ({
     <HoverCard followCursor={followCursor}>
       <HoverCardTrigger asChild>
         <a
-          className="size-12 border border-gray-600 rounded-full overflow-hidden"
+          className="size-12 overflow-hidden rounded-full border border-eggshell/35 shadow-[0_10px_25px_rgba(0,0,0,0.16)] transition-transform duration-300 hover:scale-[1.03] sm:size-14"
           href="https://github.com/Halloloid"
           target="_blank"
           rel="noreferrer noopener"
+          aria-label="Open Halloloid on GitHub"
         >
-          <img
-            src="https://avatars.githubusercontent.com/u/199330005?v=4"
-            alt="Animate UI"
-            width={"100%"}
-          />
+          <img src={avatarUrl} alt="Halloloid avatar" width="100%" />
         </a>
       </HoverCardTrigger>
 
@@ -41,32 +40,36 @@ export const RadixHoverCardDemo = ({
         sideOffset={sideOffset}
         align={align}
         alignOffset={alignOffset}
-        className="w-80 bg-black border-gray-800"
+        className="w-[min(18rem,calc(100vw-1.5rem))] rounded-[1.5rem] border border-gray-800 bg-black p-4 sm:w-80"
       >
         <div className="flex flex-col gap-4">
-          <img
-            className="size-16 rounded-full overflow-hidden border border-gray-600"
-            src="https://avatars.githubusercontent.com/u/199330005?v=4"
-            alt="Animate UI"
-          />
-          <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              className="size-14 overflow-hidden rounded-full border border-gray-600 sm:size-16"
+              src={avatarUrl}
+              alt="Halloloid avatar"
+            />
             <div>
-              <div className="font-bold text-white">Animate UI</div>
-              <div className="text-sm text-gray-400">@animate_ui</div>
+              <div className="font-bold text-white">Halloloid</div>
+              <div className="text-sm text-gray-400">@Halloloid</div>
             </div>
-            <div className="text-sm text-gray-300">
-              A fully animated, open-source component distribution built with
-              React, TypeScript, Tailwind CSS, and Motion.
+          </div>
+
+          <div className="space-y-3">
+            <div className="text-sm leading-6 text-gray-300">
+              Building developer-first UI, animated interactions, and a warmer blog experience that
+              stays usable on mobile.
             </div>
-            <div className="flex gap-4">
-              <div className="flex gap-1 text-sm items-center">
-                <div className="font-bold text-white">0</div>{' '}
-                <div className="text-gray-400">Following</div>
-              </div>
-              <div className="flex gap-1 text-sm items-center">
-                <div className="font-bold text-white">2,900</div>{' '}
-                <div className="text-gray-400">Followers</div>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full border border-eggshell/20 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-eggshell/70">
+                React
+              </span>
+              <span className="rounded-full border border-eggshell/20 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-eggshell/70">
+                Motion
+              </span>
+              <span className="rounded-full border border-eggshell/20 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-eggshell/70">
+                DevBlog
+              </span>
             </div>
           </div>
         </div>
