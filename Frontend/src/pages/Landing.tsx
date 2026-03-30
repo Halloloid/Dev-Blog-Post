@@ -37,19 +37,6 @@ const Landing = () => {
                 </p>
               </div>
 
-              {/* <div className="grid gap-3 sm:grid-cols-3">
-                {highlights.map((highlight) => (
-                  <article
-                    key={highlight.title}
-                    className="rounded-[1.5rem] border border-eggshell/15 bg-eggshell/10 p-4 text-left backdrop-blur-sm"
-                  >
-                    <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-eggshell sm:tracking-[0.2em]">
-                      {highlight.title}
-                    </h2>
-                    <p className="mt-3 text-sm leading-6 text-eggshell/78">{highlight.body}</p>
-                  </article>
-                ))}
-              </div> */}
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <FlipButton asChild className="w-full sm:w-auto">
@@ -100,7 +87,7 @@ const Landing = () => {
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-eggshell/65 sm:tracking-[0.32em]">
                   Community Signal
                 </p>
-                <h2 className="mt-2 text-[1.75rem] font-black uppercase leading-[1] tracking-[-0.03em] text-eggshell sm:text-3xl sm:tracking-[-0.04em] lg:text-4xl">
+                <h2 className="mt-2 text-[1.75rem] font-black uppercase leading-none tracking-[-0.03em] text-eggshell sm:text-3xl sm:tracking-[-0.04em] lg:text-4xl">
                   Motion that still reads well on mobile.
                 </h2>
               </div>
