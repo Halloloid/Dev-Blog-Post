@@ -83,26 +83,52 @@ function PostView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-eggshell text-toffeebrown">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-lightbronze/28 blur-3xl" />
+          <div className="absolute right-0 top-20 h-72 w-72 rounded-full bg-skyreflection/18 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-rossycopper/12 blur-3xl" />
+        </div>
+        <div className="relative flex flex-col items-center gap-4 rounded-[1.75rem] border border-toffeebrown/12 bg-eggshell/78 px-8 py-7 shadow-[0_18px_55px_rgba(158,98,64,0.08)]">
           <AnimatedCircularProgressBar
             value={progress}
-            gaugePrimaryColor="var(--color-land)"
-            gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
-            className="text-white"
+            gaugePrimaryColor="var(--color-rossycopper)"
+            gaugeSecondaryColor="var(--color-lightbronze)"
+            className="text-toffeebrown"
           />
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-toffeebrown/58">
+            Loading Story
+          </p>
         </div>
       </div>
     );
   }
 
-  return post ? (
+  if (!post) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-eggshell px-4 text-toffeebrown">
+        <div className="max-w-lg rounded-[1.9rem] border border-toffeebrown/12 bg-eggshell/85 px-8 py-10 text-center shadow-[0_18px_55px_rgba(158,98,64,0.08)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-toffeebrown/48">
+            Post View
+          </p>
+          <h1 className="mt-3 text-[clamp(2rem,6vw,3.2rem)] font-black uppercase tracking-[-0.05em] text-toffeebrown">
+            Story Not Found
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-toffeebrown/68">
+            This post is unavailable right now or may have been removed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <BlogPost
       post={post}
       comments={comment}
       onCommentPosted={fetchPost}
     />
-  ) : null;
+  );
 }
 
 export default PostView;

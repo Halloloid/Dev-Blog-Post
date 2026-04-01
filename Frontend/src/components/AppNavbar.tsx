@@ -18,7 +18,7 @@ function AppNavbar({ user, onHeightChange }: AppNavbarProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   const navButtonClassName =
-    "group inline-flex h-11 items-center gap-2 rounded-full border px-5 text-[0.95rem] font-bold leading-none transition-all";
+    "group inline-flex h-10 min-w-0 items-center gap-2 rounded-full border px-3.5 text-[0.78rem] font-bold leading-none transition-all sm:h-11 sm:px-5 sm:text-[0.95rem]";
   const homeButtonClassName =
     `${navButtonClassName} border-vio bg-vio/12 text-vio hover:bg-vio hover:text-black`;
   const createButtonClassName =
@@ -69,18 +69,18 @@ function AppNavbar({ user, onHeightChange }: AppNavbarProps) {
   return (
     <nav
       ref={navRef}
-      className={`fixed inset-x-0 top-0 z-[120] w-full min-h-18 border-b border-fuchsia-500/30 bg-black/65 px-5 py-3 backdrop-blur-md transition-transform duration-300 ease-out sm:px-8 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
+      className={`fixed inset-x-0 top-0 z-[120] w-full min-h-18 border-b border-fuchsia-500/30 bg-black/65 px-4 py-3 backdrop-blur-md transition-transform duration-300 ease-out sm:px-8 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
     >
-      <div className="flex items-center justify-between gap-4">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <button
         type="button"
         onClick={() => navigate("/home")}
-        className="flex items-center gap-3 text-left"
+        className="flex w-full items-center justify-center gap-3 text-left sm:w-auto sm:justify-start"
       >
-        <HyperText className="text-2xl text-white">Dev_Blog</HyperText>
+        <HyperText className="text-xl text-white sm:text-2xl">Dev_Blog</HyperText>
       </button>
 
-      <div className="flex flex-wrap items-center justify-end gap-3">
+      <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:w-auto sm:justify-end sm:gap-3">
         <button
           type="button"
           onClick={() => navigate("/home")}
