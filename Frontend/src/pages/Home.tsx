@@ -1,19 +1,23 @@
-import Card from "@/components/Card"
+import Card, { type CardProps } from "@/components/Card"
 import { Pagination } from "@/components/Pagination"
 import SearchBar from "@/components/SearchBar"
-import { Highlighter } from "@/components/ui/highlighter"
-import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar"
 import api from "@/config/api"
-import { useEffect, useRef, useState } from "react"
-import { type CardProps } from "@/components/Card"
+import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 
 export type Tag = {
   id: string,
   name: string,
   slug: string
 }
+
+const sortOptions = [
+  { label: "Recent", value: "created_at" },
+  { label: "Most Liked", value: "likes_count" },
+  { label: "Most Viewed", value: "view_count" },
+] as const
 
 const Home = () => {
   const [currenrPage, setcurrentPage] = useState(1);
@@ -82,21 +86,6 @@ const Home = () => {
     }
   };
 
-  const handleMostLiked = () => {
-    setcurrentPage(1);
-    setSortBy("likes_count");
-  };
-
-  const handleMostViewed = () => {
-    setcurrentPage(1);
-    setSortBy("view_count");
-  };
-
-  const handleRecent = () => {
-    setcurrentPage(1);
-    setSortBy("created_at");
-  };
-
   const handleSlectedTag = (slug: string) => {
     setcurrentPage(1);
     setSelecetdTag(slug);
@@ -118,175 +107,267 @@ const Home = () => {
     }
   };
 
+  const activeSortLabel =
+    sortOptions.find((option) => option.value === sortBy)?.label ?? "Recent";
+
   return (
-    <div className="relative min-h-screen bg-linear-to-b from-black via-slate-950 to-black text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-eggshell text-toffeebrown">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-20 top-0 h-64 w-64 rounded-full bg-lightbronze/35 blur-3xl" />
+        <div className="absolute right-0 top-20 h-72 w-72 rounded-full bg-skyreflection/25 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-rossycopper/15 blur-3xl" />
+      </div>
+
       {loading && !hasLoadedOnce && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-black">
+        <div className="fixed inset-0 z-70 flex items-center justify-center bg-eggshell/95 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar
               value={progress}
-              gaugePrimaryColor="var(--color-vio)"
-              gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
-              className="text-white"
+              gaugePrimaryColor="var(--color-rossycopper)"
+              gaugeSecondaryColor="var(--color-lightbronze)"
+              className="text-toffeebrown"
             />
           </div>
         </div>
       )}
 
-      {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <section className="overflow-hidden rounded-[2rem] border border-toffeebrown/15 bg-rossycopper text-eggshell shadow-[0_24px_80px_rgba(158,98,64,0.18)]">
+          <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)] lg:items-end">
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-eggshell/70">
+                  DevBlog Home
+                </p>
+                <h1 className="max-w-4xl text-[clamp(2.4rem,7vw,5.2rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-eggshell">
+                  Browse developer notes, launches, and late-night builds.
+                </h1>
+                <p className="max-w-2xl text-sm leading-7 text-eggshell/82 sm:text-base">
+                  The feed now uses the same warm editorial energy as the landing page, with a
+                  softer reading surface and a broader palette across tags, filters, cards, and
+                  pagination.
+                </p>
+              </div>
 
-        {/* Search Section */}
-        <div className="mb-10">
-          <div className="w-full">
-            <SearchBar
-              value={inputQuery}
-              onChange={setInputQuery}
-              onSubmit={handleSearchSubmit}
-            />
-          </div>
-          <p className="text-xs text-fuchsia-300/50 mt-2">
-            {query && `Searching for: "${query}"`}
-          </p>
-        </div>
+              <div className="w-full">
+                <SearchBar
+                  value={inputQuery}
+                  onChange={setInputQuery}
+                  onSubmit={handleSearchSubmit}
+                />
+              </div>
 
-        {/* Filter & Sort Section */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-fuchsia-300 mb-3">Sort By</p>
-            <div className="flex flex-wrap gap-2">
-              <ShimmerButton
-                onClick={handleRecent}
-                className={sortBy === "created_at" ? "ring-2 ring-fuchsia-400" : ""}
-              >
-                Recent
-              </ShimmerButton>
-              <ShimmerButton
-                onClick={handleMostLiked}
-                className={sortBy === "likes_count" ? "ring-2 ring-fuchsia-400" : ""}
-              >
-                Most Liked
-              </ShimmerButton>
-              <ShimmerButton
-                onClick={handleMostViewed}
-                className={sortBy === "view_count" ? "ring-2 ring-fuchsia-400" : ""}
-              >
-                Most Viewed
-              </ShimmerButton>
+              <div className="flex flex-wrap gap-2">
+                <span className="inline-flex items-center rounded-full border border-eggshell/20 bg-eggshell/10 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-eggshell/78">
+                  Sort: {activeSortLabel}
+                </span>
+                <span className="inline-flex items-center rounded-full border border-eggshell/20 bg-eggshell/10 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-eggshell/78">
+                  {selectedTag ? `Tag: ${selectedTag}` : "All Tags"}
+                </span>
+                <span className="inline-flex items-center rounded-full border border-eggshell/20 bg-eggshell/10 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-eggshell/78">
+                  {query ? `Query: ${query}` : "Open Feed"}
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-[1.7rem] border border-eggshell/20 bg-eggshell/10 p-5 backdrop-blur-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-eggshell/68">
+                Browsing Snapshot
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-[1.25rem] border border-eggshell/15 bg-toffeebrown/12 p-4">
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-eggshell/60">
+                    Showing
+                  </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-eggshell">
+                    {posts.length}
+                  </p>
+                </div>
+                <div className="rounded-[1.25rem] border border-eggshell/15 bg-toffeebrown/12 p-4">
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-eggshell/60">
+                    Page
+                  </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-eggshell">
+                    {currenrPage}
+                  </p>
+                </div>
+                <div className="col-span-2 rounded-[1.25rem] border border-eggshell/15 bg-toffeebrown/12 p-4">
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-eggshell/60">
+                    Current Focus
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-eggshell/82">
+                    {selectedTag
+                      ? `Filtered by #${selectedTag} and sorted by ${activeSortLabel}.`
+                      : `Browsing all posts sorted by ${activeSortLabel}.`}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Selected Tag Display */}
-        {selectedTag && (
-          <div className="mb-6 flex items-center gap-2 p-3 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-lg w-fit">
-            <span className="text-sm text-fuchsia-300">
-              Tagged: <span className="font-semibold">{selectedTag}</span>
-            </span>
-            <button
-              onClick={handleClearTag}
-              className="p-1 hover:bg-fuchsia-500/20 rounded transition-colors"
-            >
-              <X size={16} className="text-fuchsia-400" />
-            </button>
-          </div>
-        )}
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-          {/* Tags Sidebar */}
-          <aside className="lg:col-span-1 order-2 lg:order-1">
-            <div className="rounded-2xl bg-white/3 border border-fuchsia-500/30 p-6 sticky top-[calc(var(--app-navbar-height,0px)+1.5rem)] h-fit">
-              <div className="text-2xl font-bold text-center mb-6">
-                <Highlighter action="underline" color="#FF00FF">
-                  <span className="text-fuchsia-400">Tags</span>
-                </Highlighter>
-              </div>
-
-              <div className="flex flex-col gap-2 max-h-96 overflow-y-auto pr-2">
-                {tags.length > 0 ? (
-                  tags.map((tag) => (
+        <div className="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-[18rem_minmax(0,1fr)]">
+          <aside className="order-2 xl:order-1">
+            <div className="space-y-4 xl:sticky xl:top-[calc(var(--app-navbar-height,0px)+1.5rem)]">
+              <section className="rounded-[1.75rem] border border-toffeebrown/15 bg-eggshell/80 p-5 shadow-[0_18px_60px_rgba(158,98,64,0.08)] backdrop-blur-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-toffeebrown/55">
+                  Sort Feed
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
+                  {sortOptions.map((option) => (
                     <button
-                      key={tag.id}
-                      className={`w-full py-2.5 px-4 rounded-lg border text-sm font-medium transition-all duration-200 cursor-pointer text-left
-                        ${selectedTag === tag.slug
-                          ? "bg-fuchsia-500/30 border-fuchsia-400 text-white"
-                          : "border-fuchsia-500/40 text-fuchsia-300 bg-fuchsia-500/5 hover:bg-fuchsia-500/20 hover:border-fuchsia-400 hover:text-white"
-                        }`}
-                      onClick={() => handleSlectedTag(tag.slug)}
+                      key={option.value}
+                      onClick={() => {
+                        setcurrentPage(1);
+                        setSortBy(option.value);
+                      }}
+                      className={cn(
+                        "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                        sortBy === option.value
+                          ? "border-rossycopper bg-rossycopper text-eggshell"
+                          : "border-toffeebrown/18 bg-eggshell text-toffeebrown hover:border-rossycopper/40 hover:bg-lightbronze/20"
+                      )}
                     >
-                      # {tag.name}
+                      {option.label}
                     </button>
-                  ))
-                ) : (
-                  <p className="text-fuchsia-300/50 text-sm text-center py-4">No tags available</p>
-                )}
-              </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-[1.75rem] border border-toffeebrown/15 bg-eggshell/80 p-5 shadow-[0_18px_60px_rgba(158,98,64,0.08)] backdrop-blur-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-toffeebrown/55">
+                      Tags
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-toffeebrown">
+                      Filter By Topic
+                    </h2>
+                  </div>
+                  {selectedTag && (
+                    <button
+                      onClick={handleClearTag}
+                      className="inline-flex items-center gap-2 rounded-full border border-rossycopper/20 bg-rossycopper/10 px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-rossycopper transition-colors hover:bg-rossycopper/16"
+                    >
+                      Clear
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 xl:max-h-[32rem] xl:overflow-y-auto xl:pr-2">
+                  {tags.length > 0 ? (
+                    tags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        className={cn(
+                          "rounded-full border px-3 py-2 text-sm font-medium transition-colors",
+                          selectedTag === tag.slug
+                            ? "border-skyreflection bg-skyreflection/20 text-toffeebrown"
+                            : "border-toffeebrown/18 bg-eggshell text-toffeebrown/78 hover:border-skyreflection/40 hover:bg-skyreflection/12 hover:text-toffeebrown"
+                        )}
+                        onClick={() => handleSlectedTag(tag.slug)}
+                      >
+                        #{tag.name}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="py-4 text-sm text-toffeebrown/55">No tags available</p>
+                  )}
+                </div>
+              </section>
             </div>
           </aside>
 
-          {/* Cards Section */}
-          <main ref={cardsRef} className="lg:col-span-2 order-1 lg:order-2 flex flex-col gap-6">
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <div key={post.id} className="animate-fadeIn">
-                  <Card
-                    id={post.id}
-                    title={post.title}
-                    featured_img={post.featured_img}
-                    view_count={post.view_count}
-                    comments_count={post.comments_count}
-                    likes_count={post.likes_count}
-                    exceprt={post.exceprt}
-                    tags={post.tags}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <p className="text-fuchsia-300/50 text-lg">No posts found</p>
+          <main ref={cardsRef} className="order-1 xl:order-2">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-toffeebrown/55">
+                  Feed
+                </p>
+                <h2 className="mt-2 text-[clamp(2rem,5vw,3.4rem)] font-black uppercase tracking-[-0.05em] text-toffeebrown">
+                  Developer Posts
+                </h2>
+              </div>
+              <div className="rounded-full border border-toffeebrown/15 bg-eggshell/80 px-4 py-2 text-sm font-semibold text-toffeebrown/72 shadow-[0_12px_30px_rgba(158,98,64,0.08)]">
+                Page {currenrPage} of {totalPage}
+              </div>
+            </div>
+
+            {(query || selectedTag) && (
+              <div className="mb-5 flex flex-wrap items-center gap-2 rounded-[1.5rem] border border-toffeebrown/15 bg-eggshell/80 p-4 shadow-[0_16px_40px_rgba(158,98,64,0.06)]">
+                {query && (
+                  <span className="inline-flex items-center rounded-full border border-lightbronze/30 bg-lightbronze/18 px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-toffeebrown">
+                    Search: {query}
+                  </span>
+                )}
+                {selectedTag && (
+                  <span className="inline-flex items-center rounded-full border border-skyreflection/35 bg-skyreflection/18 px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-toffeebrown">
+                    Tag: {selectedTag}
+                  </span>
+                )}
               </div>
             )}
+
+            <div className="flex flex-col gap-5">
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <div key={post.id} className="animate-home-fade-in">
+                    <Card
+                      id={post.id}
+                      title={post.title}
+                      featured_img={post.featured_img}
+                      view_count={post.view_count}
+                      comments_count={post.comments_count}
+                      likes_count={post.likes_count}
+                      exceprt={post.exceprt}
+                      tags={post.tags}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-[1.8rem] border border-toffeebrown/15 bg-eggshell/80 px-6 py-14 text-center shadow-[0_18px_50px_rgba(158,98,64,0.08)]">
+                  <p className="text-sm font-semibold uppercase tracking-[0.26em] text-toffeebrown/50">
+                    No Results
+                  </p>
+                  <p className="mt-3 text-lg text-toffeebrown/72">
+                    No posts matched the current search or filter.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-12 flex flex-col items-center justify-center gap-4">
+              <Pagination
+                currentPage={currenrPage}
+                totalPage={totalPage}
+                onHandleNext={handleNext}
+                onHandlePrevious={handlePrev}
+              />
+              <p className="text-sm text-toffeebrown/60">
+                Page <span className="font-semibold text-rossycopper">{currenrPage}</span> of{" "}
+                <span className="font-semibold text-skyreflection">{totalPage}</span>
+              </p>
+            </div>
           </main>
-
         </div>
-
-        {/* Pagination Section */}
-        <div className="flex flex-col items-center justify-center mt-14 gap-4">
-          <Pagination
-            currentPage={currenrPage}
-            totalPage={totalPage}
-            onHandleNext={handleNext}
-            onHandlePrevious={handlePrev}
-          />
-          <p style={{
-            color: "rgba(255,255,255,0.4)",
-            fontSize: "13px",
-            fontFamily: "'DM Sans', sans-serif"
-          }} className="mt-2">
-            Page <span className="font-semibold text-fuchsia-300">{currenrPage}</span> of <span className="font-semibold text-fuchsia-300">{totalPage}</span>
-          </p>
-        </div>
-
       </div>
 
-      {/* Loading Overlay */}
       {loading && hasLoadedOnce && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/35 backdrop-blur-sm">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-eggshell/55 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
             <AnimatedCircularProgressBar
               value={progress}
-              gaugePrimaryColor="var(--color-vio)"
-              gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
-              className="text-white"
+              gaugePrimaryColor="var(--color-rossycopper)"
+              gaugeSecondaryColor="var(--color-lightbronze)"
+              className="text-toffeebrown"
             />
           </div>
         </div>
       )}
 
       <style>{`
-        @keyframes fadeIn {
+        @keyframes homeFadeIn {
           from {
             opacity: 0;
             transform: translateY(10px);
@@ -296,27 +377,9 @@ const Home = () => {
             transform: translateY(0);
           }
         }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
 
-        /* Custom scrollbar for tags */
-        .overflow-y-auto::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .overflow-y-auto::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .overflow-y-auto::-webkit-scrollbar-thumb {
-          background: rgba(217, 70, 239, 0.3);
-          border-radius: 3px;
-        }
-
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-          background: rgba(217, 70, 239, 0.5);
+        .animate-home-fade-in {
+          animation: homeFadeIn 0.35s ease-out;
         }
       `}</style>
     </div>

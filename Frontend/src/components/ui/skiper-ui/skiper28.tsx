@@ -13,8 +13,6 @@ const storyLines = [
   "Let each update feel handcrafted, readable, and easy to browse on any screen.",
 ];
 
-const storyTags = ["Mobile-first", "Readable motion", "Warm editorial UI"];
-
 const Skiper28 = () => {
   const targetRef = useRef<HTMLElement | null>(null);
   const { scrollYProgress } = useScroll({
