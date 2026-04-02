@@ -126,7 +126,6 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0% 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -211,7 +210,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-black text-foreground overflow-x-hidden;
+    @apply text-foreground overflow-x-hidden;
   }
 }
 
