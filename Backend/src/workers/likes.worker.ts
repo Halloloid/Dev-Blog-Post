@@ -99,37 +99,93 @@ const processBatch = async (events: LikeEvent[]) => {
         else toUnlike.push(e)
     }
 
-    if (toLike.length) {
-        await prisma.postLike.createMany({
-            data: toLike.map(e => ({ post_id: e.postId, user_id: e.userId })),
-            skipDuplicates: true
-        });
-    }
+    const postIds = [...new Set(events.map((e)=>e.postId))];
+    const likePairs = [...toLike, ...toUnlike].map(e => ({
+        post_id: e.postId,
+        user_id: e.userId
+    }));
 
-    if (toUnlike.length) {
-        await prisma.postLike.deleteMany({
-            where: {
-                OR: toUnlike.map(e => ({ post_id: e.postId, user_id: e.userId }))
+    const [posts, existingLikes] = await prisma.$transaction([
+        prisma.post.findMany({
+            where: { id: { in: postIds } },
+            select: { id: true, created_by: true }
+        }),
+        likePairs.length
+            ? prisma.postLike.findMany({
+                where: { OR: likePairs },
+                select: { post_id: true, user_id: true }
+            })
+            : prisma.postLike.findMany({
+                where: { id: { in: [] } },
+                select: { post_id: true, user_id: true }
+            })
+    ]);
+
+    const authorByPostId = new Map(posts.map(post => [post.id, post.created_by]));
+    const existingLikeKeys = new Set(
+        existingLikes.map(like => `${like.post_id}:${like.user_id}`)
+    );
+
+    const effectiveLikes = toLike.filter(
+        e => !existingLikeKeys.has(`${e.postId}:${e.userId}`)
+    );
+    const effectiveUnlikes = toUnlike.filter(
+        e => existingLikeKeys.has(`${e.postId}:${e.userId}`)
+    );
+
+    await prisma.$transaction(async (tx) => {
+        if (effectiveLikes.length) {
+            await tx.postLike.createMany({
+                data: effectiveLikes.map(e => ({ post_id: e.postId, user_id: e.userId })),
+                skipDuplicates: true
+            });
+        }
+
+        if (effectiveUnlikes.length) {
+            await tx.postLike.deleteMany({
+                where: {
+                    OR: effectiveUnlikes.map(e => ({ post_id: e.postId, user_id: e.userId }))
+                }
+            })
+        }
+
+        const deltaByPost = new Map<string, number>();
+        const deltaByAuthor = new Map<string, number>();
+
+        for (const e of effectiveLikes) {
+            deltaByPost.set(e.postId, (deltaByPost.get(e.postId) ?? 0) + 1);
+
+            const authorId = authorByPostId.get(e.postId);
+            if (authorId) {
+                deltaByAuthor.set(authorId, (deltaByAuthor.get(authorId) ?? 0) + 1);
             }
-        })
-    }
+        }
 
-    const deltaByPost = new Map<string, number>();
-    for (const e of toLike) {
-        deltaByPost.set(e.postId, (deltaByPost.get(e.postId) ?? 0) + 1);
-    }
+        for (const e of effectiveUnlikes) {
+            deltaByPost.set(e.postId, (deltaByPost.get(e.postId) ?? 0) - 1);
 
-    for (const e of toUnlike) {
-        deltaByPost.set(e.postId, (deltaByPost.get(e.postId) ?? 0) - 1);
-    }
+            const authorId = authorByPostId.get(e.postId);
+            if (authorId) {
+                deltaByAuthor.set(authorId, (deltaByAuthor.get(authorId) ?? 0) - 1);
+            }
+        }
 
-    for (const [postId, delta] of deltaByPost.entries()) {
-        if (delta === 0) continue;
-        await prisma.post.update({
-            where: { id: postId },
-            data: { likes_count: { increment: delta } }
-        })
-    }
+        for (const [postId, delta] of deltaByPost.entries()) {
+            if (delta === 0) continue;
+            await tx.post.update({
+                where: { id: postId },
+                data: { likes_count: { increment: delta } }
+            })
+        }
+
+        for (const [authorId, delta] of deltaByAuthor.entries()) {
+            if (delta === 0) continue;
+            await tx.user.update({
+                where: { id: authorId },
+                data: { total_likes_received: { increment: delta } }
+            })
+        }
+    });
 
     await redis.xack(
         STREAM_KEY,
