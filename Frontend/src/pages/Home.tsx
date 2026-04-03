@@ -131,7 +131,7 @@ const Home = () => {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div className="relative mx-auto max-w-7xl px-4 pb-6 pt-[calc(var(--app-navbar-height,0px)+1rem)] sm:px-6 sm:pb-6 sm:pt-[calc(var(--app-navbar-height,0px)+1.25rem)] lg:px-8 lg:pb-8 lg:pt-[calc(var(--app-navbar-height,0px)+1.5rem)]">
         <section className="overflow-hidden rounded-[2rem] border border-toffeebrown/15 bg-rossycopper text-eggshell shadow-[0_24px_80px_rgba(158,98,64,0.18)]">
           <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)] lg:items-end">
             <div className="space-y-5">

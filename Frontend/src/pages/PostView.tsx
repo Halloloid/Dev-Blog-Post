@@ -83,7 +83,7 @@ function PostView() {
 
   if (loading) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-eggshell text-toffeebrown">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-eggshell px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)] text-toffeebrown">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-lightbronze/28 blur-3xl" />
           <div className="absolute right-0 top-20 h-72 w-72 rounded-full bg-skyreflection/18 blur-3xl" />
@@ -106,7 +106,7 @@ function PostView() {
 
   if (!post) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-eggshell px-4 text-toffeebrown">
+      <div className="flex min-h-screen items-center justify-center bg-eggshell px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)] text-toffeebrown">
         <div className="max-w-lg rounded-[1.9rem] border border-toffeebrown/12 bg-eggshell/85 px-8 py-10 text-center shadow-[0_18px_55px_rgba(158,98,64,0.08)]">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-toffeebrown/48">
             Post View

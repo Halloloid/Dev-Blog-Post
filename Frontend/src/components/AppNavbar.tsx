@@ -79,7 +79,7 @@ function AppNavbar({ user, onHeightChange }: AppNavbarProps) {
     <nav
       ref={navRef}
       className={cn(
-        "fixed inset-x-0 top-0 z-[120] px-3 py-2 transition-transform duration-300 ease-out sm:px-4 lg:px-6 ",
+        "fixed inset-x-0 top-0 z-[120] px-3 py-2 transition-transform duration-300 ease-out sm:px-4 lg:px-6",
         isVisible ? "translate-y-0" : "-translate-y-full"
       )}
     >

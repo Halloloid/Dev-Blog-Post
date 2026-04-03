@@ -322,7 +322,7 @@ export default function UserProfile() {
 
   if (!userData && !loading) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-eggshell px-4 text-toffeebrown">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-eggshell px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)] text-toffeebrown">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-lightbronze/28 blur-3xl" />
           <div className="absolute right-0 top-20 h-72 w-72 rounded-full bg-skyreflection/18 blur-3xl" />
@@ -522,7 +522,7 @@ export default function UserProfile() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-skyreflection)_0%,transparent_34%)] opacity-25" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,var(--color-lightbronze)_0%,transparent_36%)] opacity-18" />
 
-          <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pb-14 lg:pt-10">
+          <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-[calc(var(--app-navbar-height,0px)+1rem)] sm:px-6 lg:px-8 lg:pb-14 lg:pt-[calc(var(--app-navbar-height,0px)+1.5rem)]">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <span className="inline-flex items-center gap-2 rounded-full border border-eggshell/18 bg-eggshell/10 px-3 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-eggshell/84">
                 <Sparkles className="size-3.5" />

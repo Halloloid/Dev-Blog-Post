@@ -65,7 +65,7 @@ export default function Followers() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)]">
         <div className="flex flex-col items-center gap-3">
           <AnimatedCircularProgressBar
             value={progress}
@@ -80,7 +80,7 @@ export default function Followers() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 pb-12 pt-[calc(var(--app-navbar-height,0px)+2rem)]">
         <button
           onClick={() => navigate(`/profile/${username}`)}
           className="inline-flex items-center gap-2 mb-8 border border-blue/30 px-4 py-2 rounded-md text-blue hover:bg-blue/10 transition-colors"

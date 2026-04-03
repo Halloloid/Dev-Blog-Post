@@ -343,7 +343,7 @@ function CreatePost() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100">
-      <div className="sticky  z-50 bg-[#0a0a0a] border-b border-gray-800">
+      <div className="sticky top-[var(--app-navbar-height,0px)] z-50 bg-[#0a0a0a] border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-land">
             {isDraftMode ? 'Continue Draft' : 'Create New Post'}

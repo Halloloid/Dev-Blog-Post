@@ -687,7 +687,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-skyreflection)_0%,transparent_38%)] opacity-20" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,var(--color-lightbronze)_0%,transparent_36%)] opacity-20" />
 
-        <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pb-14 lg:pt-10">
+        <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-[calc(var(--app-navbar-height,0px)+1rem)] sm:px-6 lg:px-8 lg:pb-14 lg:pt-[calc(var(--app-navbar-height,0px)+1.5rem)]">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-eggshell/18 bg-eggshell/10 px-3 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-eggshell/84">
               <Sparkles className="size-3.5" />

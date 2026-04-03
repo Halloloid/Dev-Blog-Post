@@ -63,7 +63,6 @@ const App = () => {
         />
       )}
       {showNavbar && <AppNavbar user={authUser} onHeightChange={setNavbarHeight} />}
-      {showNavbar && <div aria-hidden="true" style={{ height: navbarHeight }} />}
       <Routes>
         <Route path="/" element={<Landing/>} />
         <Route path="/home" element={<Home/>}/>

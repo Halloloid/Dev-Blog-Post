@@ -216,7 +216,7 @@ function UpdatePost() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)]">
         <div className="flex flex-col items-center gap-3">
           <AnimatedCircularProgressBar
             value={progress}
