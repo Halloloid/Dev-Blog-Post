@@ -24,7 +24,11 @@ const App = () => {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [navbarHeight, setNavbarHeight] = useState(0);
   const location = useLocation();
-  const showNavbar = location.pathname !== "/";
+  const pathname = location.pathname;
+  const showNavbar =
+    pathname !== "/" &&
+    !pathname.startsWith("/createpost") &&
+    !pathname.endsWith("/edit");
 
   useEffect(() => {
     let isMounted = true;
