@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "dev:all": "concurrently \"tsx watch src/index.ts\" \"tsx src/workers/likes.worker.ts\"",
+    "dev:all": "tsx watch src/index.ts",
     "build": "prisma generate && tsc && cpx \"src/**/*.lua\" dist",
-    "start": "concurrently \"node dist/index.js\" \"node dist/workers/likes.worker.js\"",
+    "start": "node dist/index.js",
     "seed:data": "tsx prisma/seed.ts",
     "likes:worker":"tsx src/workers/likes.worker.ts"
   },
@@ -23,7 +23,6 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^25.2.0",
     "@types/pg": "^8.16.0",
-    "concurrently": "^9.1.0",
     "cpx": "^1.5.0",
     "nodemon": "^3.1.11",
     "prisma": "^7.3.0",

@@ -199,59 +199,138 @@ const processBatch = async (events: LikeEvent[]) => {
     );
 }
 
-const main = async () => {
-    await ensureGroup();
-    console.log("Likes worker running...");
+// const main = async () => {
+//     await ensureGroup();
+//     console.log("Likes worker running...");
 
-    while (true) {
-        const pending = await redis.xreadgroup(GROUP,CONSUMER,STREAM_KEY,"0",{count:MAX_BATCH_SIZE});
-        const pendingEvents = parseXReadGroupResponse(pending)
-        if (pendingEvents.length === 0) break;
-        await processBatch(pendingEvents);
+//     while (true) {
+//         const pending = await redis.xreadgroup(GROUP,CONSUMER,STREAM_KEY,"0",{count:MAX_BATCH_SIZE});
+//         const pendingEvents = parseXReadGroupResponse(pending)
+//         if (pendingEvents.length === 0) break;
+//         await processBatch(pendingEvents);
+//     }
+
+//     const bufferedEvents: LikeEvent[] = [];
+//     let firstBufferedAt = 0;
+
+//     while (true) {
+//         if (bufferedEvents.length === 0) {
+//             const events = await readBatch(MAX_BATCH_SIZE, POLL_BLOCK_MS);
+//             if (events.length === 0) continue;
+
+//             bufferedEvents.push(...events);
+//             firstBufferedAt = Date.now();
+//             continue;
+//         }
+
+//         const elapsed = Date.now() - firstBufferedAt;
+//         const remainingWindow = FLUSH_WINDOW_MS - elapsed;
+
+//         if (remainingWindow <= 0 || bufferedEvents.length >= MAX_BATCH_SIZE) {
+//             await flushBufferedEvents(bufferedEvents);
+//             firstBufferedAt = 0;
+//             continue;
+//         }
+
+//         const events = await readBatch(
+//             Math.max(1, MAX_BATCH_SIZE - bufferedEvents.length),
+//             Math.min(POLL_BLOCK_MS, remainingWindow)
+//         );
+
+//         if (events.length > 0) {
+//             bufferedEvents.push(...events);
+//         }
+
+//         if (
+//             bufferedEvents.length >= MAX_BATCH_SIZE ||
+//             Date.now() - firstBufferedAt >= FLUSH_WINDOW_MS
+//         ) {
+//             await flushBufferedEvents(bufferedEvents);
+//             firstBufferedAt = 0;
+//         }
+//     }
+// }
+
+// main().catch(err => {
+//     console.error("Worker Failed:", err);
+//     process.exit(1)
+// })
+
+const runWorkerLoop = async () => {
+    try {
+        // recover pending messages
+        while (true) {
+            const pending = await redis.xreadgroup(
+                GROUP,
+                CONSUMER,
+                STREAM_KEY,
+                "0",
+                { count: MAX_BATCH_SIZE }
+            );
+
+            const pendingEvents = parseXReadGroupResponse(pending);
+            if (pendingEvents.length === 0) break;
+
+            await processBatch(pendingEvents);
+        }
+
+        const bufferedEvents: LikeEvent[] = [];
+        let firstBufferedAt = 0;
+
+        while (true) {
+            if (bufferedEvents.length === 0) {
+                const events = await readBatch(MAX_BATCH_SIZE, POLL_BLOCK_MS);
+                if (events.length === 0) continue;
+
+                bufferedEvents.push(...events);
+                firstBufferedAt = Date.now();
+                continue;
+            }
+
+            const elapsed = Date.now() - firstBufferedAt;
+            const remainingWindow = FLUSH_WINDOW_MS - elapsed;
+
+            if (remainingWindow <= 0 || bufferedEvents.length >= MAX_BATCH_SIZE) {
+                await flushBufferedEvents(bufferedEvents);
+                firstBufferedAt = 0;
+                continue;
+            }
+
+            const events = await readBatch(
+                Math.max(1, MAX_BATCH_SIZE - bufferedEvents.length),
+                Math.min(POLL_BLOCK_MS, remainingWindow)
+            );
+
+            if (events.length > 0) {
+                bufferedEvents.push(...events);
+            }
+
+            if (
+                bufferedEvents.length >= MAX_BATCH_SIZE ||
+                Date.now() - firstBufferedAt >= FLUSH_WINDOW_MS
+            ) {
+                await flushBufferedEvents(bufferedEvents);
+                firstBufferedAt = 0;
+            }
+        }
+
+    } catch (err) {
+        console.error("Worker loop crashed:", err);
+
+        // 🔁 restart after crash (VERY IMPORTANT)
+        setTimeout(runWorkerLoop, 5000);
     }
+};
 
-    const bufferedEvents: LikeEvent[] = [];
-    let firstBufferedAt = 0;
+export const startLikesWorker = async () => {
+    try {
+        await ensureGroup();
+        console.log("Likes worker running...");
 
-    while (true) {
-        if (bufferedEvents.length === 0) {
-            const events = await readBatch(MAX_BATCH_SIZE, POLL_BLOCK_MS);
-            if (events.length === 0) continue;
+        // 🔥 run in background (don’t block server)
+        runWorkerLoop();
 
-            bufferedEvents.push(...events);
-            firstBufferedAt = Date.now();
-            continue;
-        }
-
-        const elapsed = Date.now() - firstBufferedAt;
-        const remainingWindow = FLUSH_WINDOW_MS - elapsed;
-
-        if (remainingWindow <= 0 || bufferedEvents.length >= MAX_BATCH_SIZE) {
-            await flushBufferedEvents(bufferedEvents);
-            firstBufferedAt = 0;
-            continue;
-        }
-
-        const events = await readBatch(
-            Math.max(1, MAX_BATCH_SIZE - bufferedEvents.length),
-            Math.min(POLL_BLOCK_MS, remainingWindow)
-        );
-
-        if (events.length > 0) {
-            bufferedEvents.push(...events);
-        }
-
-        if (
-            bufferedEvents.length >= MAX_BATCH_SIZE ||
-            Date.now() - firstBufferedAt >= FLUSH_WINDOW_MS
-        ) {
-            await flushBufferedEvents(bufferedEvents);
-            firstBufferedAt = 0;
-        }
+    } catch (err) {
+        console.error("Worker init failed:", err);
     }
-}
-
-main().catch(err => {
-    console.error("Worker Failed:", err);
-    process.exit(1)
-})
+};

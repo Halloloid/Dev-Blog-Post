@@ -14,6 +14,7 @@ import { syncViewsToDB } from "./jobs/syncViews.js";
 import followerRoute from "./module/followers/followers.routes.js";
 import { combinedRateLimiter } from "./middlewares/rateLimiter.middleware.js";
 import tagsRoute from "./module/tags/tags.routes.js";
+import { startLikesWorker } from "./workers/likes.worker.js";
 
 config();
 connectDB();
@@ -22,7 +23,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cookieParser())
 app.use(cors({
-    origin:"http://localhost:5174",
+    origin:"*",
     credentials:true
 }))
 
@@ -63,7 +64,9 @@ app.use((_:Request,res:Response)=>{
 })
 
 const server = app.listen(PORT,()=>{
-    console.log(`Server is Running on PORT:${PORT}`)
+    console.log(`Server is Running on PORT:${PORT}`);
+
+    startLikesWorker();
 })
 
 //Handle unhandled promise rejection
