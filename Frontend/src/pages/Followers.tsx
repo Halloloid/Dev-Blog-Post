@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/config/api";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
@@ -65,67 +65,96 @@ export default function Followers() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)]">
-        <div className="flex flex-col items-center gap-3">
-          <AnimatedCircularProgressBar
-            value={progress}
-            gaugePrimaryColor="var(--color-blue)"
-            gaugeSecondaryColor="rgba(255, 255, 255, 0.12)"
-            className="text-white"
-          />
+      <div className="min-h-screen bg-eggshell px-4 pb-8 pt-[calc(var(--app-navbar-height,0px)+1rem)] text-toffeebrown">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <AnimatedCircularProgressBar
+              value={progress}
+              gaugePrimaryColor="var(--color-rossycopper)"
+              gaugeSecondaryColor="rgba(158, 98, 64, 0.12)"
+              className="text-toffeebrown"
+            />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-6 pb-12 pt-[calc(var(--app-navbar-height,0px)+2rem)]">
+    <div className="min-h-screen bg-eggshell text-toffeebrown">
+      <div className="mx-auto max-w-4xl px-4 pb-12 pt-[calc(var(--app-navbar-height,0px)+1.25rem)] sm:px-6 lg:px-8">
         <button
           onClick={() => navigate(`/profile/${username}`)}
-          className="inline-flex items-center gap-2 mb-8 border border-blue/30 px-4 py-2 rounded-md text-blue hover:bg-blue/10 transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-toffeebrown/14 bg-eggshell/90 px-4 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-toffeebrown/74 transition-colors hover:border-rossycopper/30 hover:text-toffeebrown"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={16} />
           Back to Profile
         </button>
 
-        <div className="flex items-center gap-3 mb-2">
-          <Users className="h-8 w-8 text-blue" />
-          <h1 className="text-4xl font-black uppercase tracking-tight">Followers</h1>
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-[clamp(2rem,5vw,3.2rem)] font-black uppercase tracking-[-0.05em] text-toffeebrown">
+              Followers
+            </h1>
+            <p className="mt-2 text-sm text-toffeebrown/62 sm:text-base">
+              @{username} / {count} follower{count === 1 ? "" : "s"}
+            </p>
+          </div>
         </div>
-        <p className="text-gray-400 font-mono mb-8">@{username} has {count} follower(s)</p>
 
-        {error && <p className="text-red-400 font-mono">{error}</p>}
+        {error && (
+          <div className="mt-8 rounded-[1.5rem] border border-rossycopper/22 bg-rossycopper/8 p-5 text-rossycopper">
+            <p className="text-sm leading-7">{error}</p>
+          </div>
+        )}
 
         {!error && followerUsers.length === 0 && (
-          <p className="text-gray-400 font-mono">No followers found.</p>
+          <div className="mt-8 rounded-[1.5rem] border border-toffeebrown/12 bg-eggshell/92 p-6">
+            <p className="text-sm leading-7 text-toffeebrown/64">No followers yet.</p>
+          </div>
         )}
 
         {!error && followerUsers.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {followerUsers.map((user) => (
-              <button
-                key={user.user_name}
-                onClick={() => navigate(`/profile/${user.user_name}`)}
-                className="w-full text-left border border-blue/20 rounded-lg p-4 bg-black/60 hover:border-blue transition-colors"
-              >
-                <div className="flex items-center gap-3">
+          <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-6">
+            {followerUsers.map((user, index) => {
+              const layoutClassName =
+                index % 4 === 0
+                  ? "md:col-span-4"
+                  : index % 4 === 1
+                    ? "md:col-span-2"
+                    : index % 4 === 2
+                      ? "md:col-span-3"
+                      : "md:col-span-3";
+
+              const accentClassName =
+                index % 3 === 0
+                  ? "bg-lightbronze/10"
+                  : index % 3 === 1
+                    ? "bg-skyreflection/10"
+                    : "bg-eggshell/94";
+
+              return (
+                <button
+                  key={user.user_name}
+                  onClick={() => navigate(`/profile/${user.user_name}`)}
+                  className={`flex w-full items-center gap-4 rounded-[1.45rem] border border-toffeebrown/12 px-4 py-4 text-left transition-transform duration-200 hover:-translate-y-0.5 hover:bg-lightbronze/12 sm:px-5 ${layoutClassName} ${accentClassName}`}
+                >
                   <img
                     src={user.avatar_url}
-                    alt={user.full_name}
-                    className="w-12 h-12 rounded-full object-cover border border-blue/30"
+                    alt={user.user_name}
+                    className="h-12 w-12 rounded-full border border-toffeebrown/12 object-cover sm:h-14 sm:w-14"
                     referrerPolicy="no-referrer"
                   />
-                  <div>
-                    <p className="text-white font-bold">{user.full_name}</p>
-                    <p className="text-gray-400 font-mono text-sm">@{user.user_name}</p>
-                  </div>
-                </div>
-              </button>
-            ))}
+                  <span className="truncate text-base font-semibold text-toffeebrown sm:text-lg">
+                    @{user.user_name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
     </div>
   );
 }
+
