@@ -10,6 +10,7 @@ import { Skiper28 } from "@/components/ui/skiper-ui/skiper28"
 import { Skiper58, TextRoll } from "@/components/ui/skiper-ui/skiper58"
 import { cn } from "@/lib/utils"
 import { Link } from "react-router-dom"
+import { Analytics } from "@vercel/analytics/react"
 
 const Landing = () => {
   return (
@@ -109,6 +110,7 @@ const Landing = () => {
             </div>
           </div>
 
+          <Analytics/>
           <section
             id="reviews"
             className="rounded-[2rem] border border-eggshell/20 bg-black/10 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:p-6 lg:p-8"
