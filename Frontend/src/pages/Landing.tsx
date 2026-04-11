@@ -7,7 +7,8 @@ import {
 import { LiquidButton } from "@/components/animate-ui/components/buttons/liquid"
 import { RadixHoverCardDemo } from "@/components/hoverButton"
 import { Skiper28 } from "@/components/ui/skiper-ui/skiper28"
-import { Skiper58 } from "@/components/ui/skiper-ui/skiper58"
+import { Skiper58, TextRoll } from "@/components/ui/skiper-ui/skiper58"
+import { cn } from "@/lib/utils"
 import { Link } from "react-router-dom"
 
 const Landing = () => {
@@ -27,13 +28,43 @@ const Landing = () => {
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-eggshell/70 sm:text-sm sm:tracking-[0.38em]">
                   DevBlog Landing
                 </p>
-                <h1 className="max-w-4xl text-[clamp(1.95rem,10vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.04em] text-eggshell sm:text-balance sm:leading-[0.88] sm:tracking-[-0.05em]">
-                  Write in public without losing the handmade feel.
-                </h1>
+                <TextRoll
+                  className={cn(
+                    "max-w-4xl text-[clamp(1.95rem,10vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.04em] text-eggshell sm:text-balance sm:leading-[0.88] sm:tracking-[-0.05em] m-1"
+                  )}
+                >
+                  Publish
+                </TextRoll>
+                <TextRoll
+                  className={cn(
+                    "max-w-4xl text-[clamp(1.95rem,10vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.04em] text-eggshell sm:text-balance sm:leading-[0.88] sm:tracking-[-0.05em] m-1"
+                  )}
+                >
+                  openly
+                </TextRoll>
+                <TextRoll
+                  className={cn(
+                    "max-w-4xl text-[clamp(1.95rem,10vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.04em] text-eggshell sm:text-balance sm:leading-[0.88] sm:tracking-[-0.05em] m-1"
+                  )}
+                >
+                  with a
+                </TextRoll>
+                <TextRoll
+                  className={cn(
+                    "max-w-4xl text-[clamp(1.95rem,10vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.04em] text-eggshell sm:text-balance sm:leading-[0.88] sm:tracking-[-0.05em] m-1"
+                  )}
+                >
+                  handmade
+                </TextRoll>
+                <TextRoll
+                  className={cn(
+                    "max-w-4xl text-[clamp(1.95rem,10vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.04em] text-eggshell sm:text-balance sm:leading-[0.88] sm:tracking-[-0.05em] m-1"
+                  )}
+                >
+                  voice
+                </TextRoll>
                 <p className="max-w-2xl text-sm leading-6 text-eggshell/82 sm:text-base sm:leading-7 lg:text-lg">
                   DevBlog gives your posts, projects, and in-progress ideas a louder front page.
-                  The layout now scales cleanly from desktop down to mobile, so the story still
-                  lands even on a small screen.
                 </p>
               </div>
 
@@ -70,7 +101,7 @@ const Landing = () => {
                     Creator Link
                   </p>
                   <p className="text-sm leading-6 text-eggshell/82">
-                    Hover on desktop or tap on mobile to jump straight to the project creator&apos;s
+                    Hey Checkout the creator&apos;s
                     GitHub profile.
                   </p>
                 </div>
@@ -87,14 +118,7 @@ const Landing = () => {
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-eggshell/65 sm:tracking-[0.32em]">
                   Community Signal
                 </p>
-                <h2 className="mt-2 text-[1.75rem] font-black uppercase leading-none tracking-[-0.03em] text-eggshell sm:text-3xl sm:tracking-[-0.04em] lg:text-4xl">
-                  Motion that still reads well on mobile.
-                </h2>
               </div>
-              <p className="max-w-xl text-sm leading-6 text-eggshell/76 sm:text-right">
-                Review cards now scale to the viewport, keep their spacing, and stop forcing a
-                desktop-only width.
-              </p>
             </div>
 
             <MarqueeDemo />

@@ -54,26 +54,14 @@ export const RadixHoverCardDemo = ({
               alt="Halloloid avatar"
             />
             <div>
-              <div className="font-bold text-white">Halloloid</div>
+              <div className="font-bold text-white">Amrut Prasad</div>
               <div className="text-sm text-gray-400">@Halloloid</div>
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="text-sm leading-6 text-gray-300">
-              Building developer-first UI, animated interactions, and a warmer blog experience that
-              stays usable on mobile.
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-eggshell/20 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-eggshell/70">
-                React
-              </span>
-              <span className="rounded-full border border-eggshell/20 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-eggshell/70">
-                Motion
-              </span>
-              <span className="rounded-full border border-eggshell/20 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-eggshell/70">
-                DevBlog
-              </span>
+              Building scalable, maintainable, and reliable backend systems 
             </div>
           </div>
         </div>

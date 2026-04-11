@@ -147,9 +147,6 @@ export const Skiper58 = () => {
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-eggshell/60 sm:tracking-[0.34em]">
           Explore
         </p>
-        <p className="max-w-sm text-sm leading-6 text-eggshell/75">
-          A mobile-first bento map to the feed, supporting sections, creator profile, and sign-in.
-        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -163,7 +160,7 @@ export const Skiper58 = () => {
 
 const STAGGER = 0.035;
 
-const TextRoll = ({
+export const TextRoll = ({
   children,
   className,
   center = false,
