@@ -108,7 +108,7 @@ const BentoCard = ({
         </span>
       </div>
 
-      <div className={cn("relative mt-5 min-w-0", isFeatured ? "sm:max-w-[34rem]" : "sm:max-w-[30ch]")}>
+      <div className={cn("relative mt-5 min-w-0", isFeatured ? "sm:max-w-136" : "sm:max-w-[30ch]")}>
         <TextRoll
           className={cn(
             "max-w-full text-balance font-black uppercase leading-[0.94] tracking-[-0.045em]",

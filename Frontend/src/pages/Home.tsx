@@ -33,6 +33,7 @@ const Home = () => {
   const [progress, setProgress] = useState(10);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const cardsRef = useRef<HTMLDivElement | null>(null);
+  const hasPageLoadedRef = useRef(false);
   useEffect(() => {
     setLoading(true);
     setProgress(10);
@@ -74,6 +75,11 @@ const Home = () => {
   }, [currenrPage, limit, query, sortBy, selectedTag]);
 
   useEffect(() => {
+    if (!hasPageLoadedRef.current) {
+      hasPageLoadedRef.current = true;
+      return;
+    }
+
     cardsRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start"
@@ -170,7 +176,7 @@ const Home = () => {
                 Browsing Snapshot
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-[1.25rem] border border-eggshell/15 bg-toffeebrown/12 p-4">
+                <div className="rounded-4xl border border-eggshell/15 bg-toffeebrown/12 p-4">
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-eggshell/60">
                     Showing
                   </p>
@@ -178,7 +184,7 @@ const Home = () => {
                     {posts.length}
                   </p>
                 </div>
-                <div className="rounded-[1.25rem] border border-eggshell/15 bg-toffeebrown/12 p-4">
+                <div className="rounded-4xl border border-eggshell/15 bg-toffeebrown/12 p-4">
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-eggshell/60">
                     Page
                   </p>
@@ -186,7 +192,7 @@ const Home = () => {
                     {currenrPage}
                   </p>
                 </div>
-                <div className="col-span-2 rounded-[1.25rem] border border-eggshell/15 bg-toffeebrown/12 p-4">
+                <div className="col-span-2 rounded-4xl border border-eggshell/15 bg-toffeebrown/12 p-4">
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-eggshell/60">
                     Current Focus
                   </p>
@@ -250,7 +256,7 @@ const Home = () => {
                   )}
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 xl:max-h-[32rem] xl:overflow-y-auto xl:pr-2">
+                <div className="mt-4 flex flex-wrap gap-2 xl:max-h-128 xl:overflow-y-auto xl:pr-2">
                   {tags.length > 0 ? (
                     tags.map((tag) => (
                       <button
