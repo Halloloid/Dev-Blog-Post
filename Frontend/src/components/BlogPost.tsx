@@ -189,7 +189,7 @@ const Avatar = ({
 const MetaChip = ({ icon, label }: { icon: ReactNode; label: string }) => (
   <span className="inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-eggshell/18 bg-eggshell/10 px-3 py-2 text-center text-[0.68rem] font-semibold uppercase leading-5 tracking-[0.14em] text-eggshell/84 sm:text-[0.72rem] sm:tracking-[0.16em]">
     {icon}
-    <span className="break-words">{label}</span>
+    <span className="wrap-break-word">{label}</span>
   </span>
 );
 
@@ -202,7 +202,7 @@ const SidebarStat = ({
   value: string;
   className?: string;
 }) => (
-  <div className={cn("w-full min-w-0 max-w-full rounded-[1.25rem] border px-4 py-4", className)}>
+  <div className={cn("w-full min-w-0 max-w-full rounded-4xl border px-4 py-4", className)}>
     <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-toffeebrown/52">{label}</p>
     <p className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-toffeebrown">{value}</p>
   </div>
@@ -462,7 +462,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
               <textarea
                 value={editText}
                 onChange={(event) => setEditText(event.target.value)}
-                className="w-full rounded-[1rem] border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm leading-6 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none"
+                className="w-full rounded-3xl border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm leading-6 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none"
                 rows={3}
               />
               <div className="flex flex-wrap gap-2">
@@ -554,7 +554,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                     <textarea
                       value={editText}
                       onChange={(event) => setEditText(event.target.value)}
-                      className="w-full rounded-[1rem] border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm leading-6 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none"
+                      className="w-full rounded-3xl border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm leading-6 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none"
                       rows={4}
                     />
                     <div className="flex flex-wrap gap-2">
@@ -622,7 +622,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
 
                 {replyingTo === entry.id && (
                   <form
-                    className="mt-4 rounded-[1.15rem] border border-toffeebrown/12 bg-eggshell/75 p-3.5 sm:rounded-[1.25rem] sm:p-4"
+                    className="mt-4 rounded-[1.15rem] border border-toffeebrown/12 bg-eggshell/75 p-3.5 sm:rounded-4xl sm:p-4"
                     onSubmit={(event) => {
                       event.preventDefault();
                       postReply(entry.id);
@@ -633,7 +633,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                       onChange={(event) => setReplyText(event.target.value)}
                       placeholder="Add a thoughtful reply..."
                       disabled={!currentUserId}
-                      className="w-full rounded-[1rem] border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm leading-6 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none disabled:cursor-not-allowed disabled:bg-eggshell/70"
+                      className="w-full rounded-3xl border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm leading-6 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none disabled:cursor-not-allowed disabled:bg-eggshell/70"
                       rows={3}
                     />
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -698,7 +698,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.12fr)_minmax(18rem,0.88fr)] lg:items-end lg:gap-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.12fr)_minmax(18rem,0.88fr)] lg:items-start lg:gap-8">
             <div className="min-w-0 space-y-5 sm:space-y-6">
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {post.tags.map((tag, index) => (
@@ -740,11 +740,11 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
               <div className="relative overflow-hidden rounded-[1.65rem] border border-eggshell/18 bg-eggshell/10 p-2.5 backdrop-blur-sm sm:rounded-[2rem] sm:p-3">
                 {post.featured_img ? (
                   <div className="relative overflow-hidden rounded-[1.2rem] sm:rounded-[1.5rem]">
-                    <img src={post.featured_img} alt={post.title} className="aspect-[4/5] w-full object-cover sm:aspect-[16/11] lg:aspect-[4/5]" />
+                    <img src={post.featured_img} alt={post.title} className="aspect-4/5 w-full object-cover sm:aspect-16/11 lg:aspect-4/5" />
                     <div className="absolute inset-0 bg-linear-to-t from-toffeebrown/45 via-transparent to-eggshell/8" />
                   </div>
                 ) : (
-                  <div className="flex aspect-[4/5] items-end rounded-[1.2rem] bg-linear-to-br from-lightbronze via-eggshell to-skyreflection p-5 sm:aspect-[16/11] sm:rounded-[1.5rem] sm:p-6 lg:aspect-[4/5]">
+                  <div className="flex aspect-4/5 items-end rounded-[1.2rem] bg-linear-to-br from-lightbronze via-eggshell to-skyreflection p-5 sm:aspect-16/11 sm:rounded-[1.5rem] sm:p-6 lg:aspect-4/5">
                     <span className="text-[3.2rem] font-black uppercase leading-none tracking-[-0.08em] text-toffeebrown/70 sm:text-[4rem]">
                       {post.title.slice(0, 2).toUpperCase()}
                     </span>
@@ -800,7 +800,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                     (isLiking || !currentUserId) && "cursor-not-allowed opacity-60"
                   )}
                 >
-                  <span className="inline-flex min-w-0 items-center gap-2 break-words">
+                  <span className="inline-flex min-w-0 items-center gap-2 wrap-break-word">
                     <Heart size={16} fill={liked ? "currentColor" : "none"} />
                     {liked ? "Liked" : "Like Post"}
                   </span>
@@ -811,7 +811,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                   href="#comments"
                   className="inline-flex w-full min-w-0 items-center justify-between gap-3 rounded-full border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-toffeebrown transition-colors hover:border-skyreflection/35 hover:bg-skyreflection/14 sm:w-auto lg:w-full"
                 >
-                  <span className="inline-flex min-w-0 items-center gap-2 break-words">
+                  <span className="inline-flex min-w-0 items-center gap-2 wrap-break-word">
                     <MessageCircle size={16} />
                     Jump To Notes
                   </span>
@@ -825,7 +825,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                     rel="noopener noreferrer"
                     className="inline-flex w-full min-w-0 items-center justify-between gap-3 rounded-full border border-toffeebrown/15 bg-eggshell px-4 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-toffeebrown transition-colors hover:border-lightbronze/35 hover:bg-lightbronze/14 sm:w-auto lg:w-full"
                   >
-                    <span className="inline-flex min-w-0 items-center gap-2 break-words">
+                    <span className="inline-flex min-w-0 items-center gap-2 wrap-break-word">
                       <Github size={16} />
                       View Repo
                     </span>
@@ -848,9 +848,6 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-toffeebrown/52">Story</p>
-                  <p className="mt-2 max-w-2xl text-sm leading-7 text-toffeebrown/68">
-                    Designed for slower reading, clearer hierarchy, and a cleaner finish.
-                  </p>
                 </div>
                 <div className="rounded-full border border-toffeebrown/12 bg-eggshell/80 px-4 py-2 text-sm font-semibold text-toffeebrown/68">
                   Published {formatFullDate(post.created_at)}
@@ -898,23 +895,23 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                           </SyntaxHighlighter>
                         </div>
                       ) : (
-                        <code className="break-words rounded-md bg-toffeebrown px-1.5 py-0.5 text-[0.92em] text-eggshell" {...props}>
+                        <code className="wrap-break-word rounded-md bg-toffeebrown px-1.5 py-0.5 text-[0.92em] text-eggshell" {...props}>
                           {children}
                         </code>
                       );
                     },
-                    h1: ({ children }: any) => <h1 className="mt-10 break-words text-[clamp(1.85rem,7vw,3.6rem)] font-black uppercase leading-[0.96] tracking-[-0.04em] text-toffeebrown sm:mt-12 sm:leading-[0.94] sm:tracking-[-0.05em]">{children}</h1>,
-                    h2: ({ children }: any) => <h2 className="mt-10 break-words text-[clamp(1.55rem,6vw,2.9rem)] font-black uppercase leading-[1] tracking-[-0.03em] text-rossycopper sm:mt-12 sm:leading-[0.96] sm:tracking-[-0.04em]">{children}</h2>,
-                    h3: ({ children }: any) => <h3 className="mt-8 break-words text-[clamp(1.2rem,5vw,2rem)] font-black uppercase tracking-[-0.02em] text-toffeebrown sm:mt-10 sm:tracking-[-0.03em]">{children}</h3>,
-                    p: ({ children }: any) => <p className="mt-5 break-words text-[0.98rem] leading-7 text-toffeebrown/80 sm:mt-6 sm:text-[1.08rem] sm:leading-8">{children}</p>,
+                    h1: ({ children }: any) => <h1 className="mt-10 wrap-break-word text-[clamp(1.85rem,7vw,3.6rem)] font-black uppercase leading-[0.96] tracking-[-0.04em] text-toffeebrown sm:mt-12 sm:leading-[0.94] sm:tracking-[-0.05em]">{children}</h1>,
+                    h2: ({ children }: any) => <h2 className="mt-10 wrap-break-word text-[clamp(1.55rem,6vw,2.9rem)] font-black uppercase leading-none tracking-[-0.03em] text-rossycopper sm:mt-12 sm:leading-[0.96] sm:tracking-[-0.04em]">{children}</h2>,
+                    h3: ({ children }: any) => <h3 className="mt-8 wrap-break-word text-[clamp(1.2rem,5vw,2rem)] font-black uppercase tracking-[-0.02em] text-toffeebrown sm:mt-10 sm:tracking-[-0.03em]">{children}</h3>,
+                    p: ({ children }: any) => <p className="mt-5 wrap-break-word text-[0.98rem] leading-7 text-toffeebrown/80 sm:mt-6 sm:text-[1.08rem] sm:leading-8">{children}</p>,
                     a: ({ href, children }: any) => <a href={href} target={href?.startsWith("http") ? "_blank" : undefined} rel={href?.startsWith("http") ? "noreferrer noopener" : undefined} className="break-all font-semibold text-rossycopper underline decoration-rossycopper/35 underline-offset-4 transition-colors hover:text-toffeebrown">{children}</a>,
                     ul: ({ children }: any) => <ul className="mt-6 ml-5 list-disc space-y-3 marker:text-rossycopper">{children}</ul>,
                     ol: ({ children }: any) => <ol className="mt-6 ml-5 list-decimal space-y-3 marker:text-rossycopper">{children}</ol>,
-                    li: ({ children }: any) => <li className="break-words pl-1 text-[0.98rem] leading-7 text-toffeebrown/80 sm:text-[1rem] sm:leading-8">{children}</li>,
+                    li: ({ children }: any) => <li className="wrap-break-word pl-1 text-[0.98rem] leading-7 text-toffeebrown/80 sm:text-[1rem] sm:leading-8">{children}</li>,
                     strong: ({ children }: any) => <strong className="font-bold text-rossycopper">{children}</strong>,
-                    blockquote: ({ children }: any) => <blockquote className="my-8 break-words rounded-[1.2rem] border-l-4 border-rossycopper bg-lightbronze/14 px-4 py-4 text-base italic leading-7 text-toffeebrown sm:rounded-[1.5rem] sm:px-6 sm:py-5 sm:text-lg sm:leading-8">{children}</blockquote>,
+                    blockquote: ({ children }: any) => <blockquote className="my-8 wrap-break-word rounded-[1.2rem] border-l-4 border-rossycopper bg-lightbronze/14 px-4 py-4 text-base italic leading-7 text-toffeebrown sm:rounded-[1.5rem] sm:px-6 sm:py-5 sm:text-lg sm:leading-8">{children}</blockquote>,
                     hr: () => <hr className="my-10 border-toffeebrown/12" />,
-                    img: ({ src, alt }: any) => <div className="my-8 w-full max-w-full overflow-hidden rounded-[1.3rem] border border-toffeebrown/12 bg-eggshell/78 p-2 sm:rounded-[1.6rem]"><img src={src} alt={alt ?? "Post image"} className="w-full max-w-full rounded-[1rem] object-cover sm:rounded-[1.2rem]" /></div>,
+                    img: ({ src, alt }: any) => <div className="my-8 w-full max-w-full overflow-hidden rounded-[1.3rem] border border-toffeebrown/12 bg-eggshell/78 p-2 sm:rounded-[1.6rem]"><img src={src} alt={alt ?? "Post image"} className="w-full max-w-full rounded-3xl object-cover sm:rounded-[1.2rem]" /></div>,
                   }}
                 >
                   {post.content}
@@ -999,7 +996,7 @@ function BlogPost({ post, comments, onCommentPosted }: BlogPostProps) {
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
                   placeholder="Share your thoughts..."
-                  className="mt-4 w-full rounded-[1.25rem] border border-toffeebrown/15 bg-eggshell px-4 py-4 text-sm leading-7 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none disabled:cursor-not-allowed disabled:bg-eggshell/75"
+                  className="mt-4 w-full rounded-4xl border border-toffeebrown/15 bg-eggshell px-4 py-4 text-sm leading-7 text-toffeebrown outline-none transition-colors placeholder:text-toffeebrown/40 focus:border-skyreflection resize-none disabled:cursor-not-allowed disabled:bg-eggshell/75"
                   rows={5}
                   disabled={isPostingComment || !currentUserId}
                 />
