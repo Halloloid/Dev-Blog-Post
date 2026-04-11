@@ -142,11 +142,6 @@ const Home = () => {
                 <h1 className="max-w-4xl text-[clamp(2.4rem,7vw,5.2rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-eggshell">
                   Browse developer notes, launches, and late-night builds.
                 </h1>
-                <p className="max-w-2xl text-sm leading-7 text-eggshell/82 sm:text-base">
-                  The feed now uses the same warm editorial energy as the landing page, with a
-                  softer reading surface and a broader palette across tags, filters, cards, and
-                  pagination.
-                </p>
               </div>
 
               <div className="w-full">
